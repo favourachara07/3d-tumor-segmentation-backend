@@ -19,6 +19,7 @@ import tempfile
 import zipfile
 import base64
 from contextlib import asynccontextmanager
+from .clinical_decision import generate_clinical_report
 
 import torch
 import numpy as np
@@ -362,9 +363,25 @@ async def segment_and_analyze(file: UploadFile = File(...)):
         # ------------------------------------------------------------------ #
         # 8. Structured JSON response                                         #
         # ------------------------------------------------------------------ #
+        cdss = generate_clinical_report(volume_report)
+        clinical_report = {
+            # Raw volumetrics from processing.py
+            "volumes_mm3":     volume_report["volumes_mm3"],
+            "derived_metrics": volume_report["derived_metrics"],
+            # QA / pipeline warnings from processing.py
+            "metadata":        volume_report["metadata"],
+            # CDSS outputs from clinical_decision.py
+            "triage_band":               cdss["triage_band"],
+            "malignancy_likelihood_pct": cdss["malignancy_likelihood_pct"],
+            "grade_hint":                cdss["grade_hint"],
+            "grade_probabilities":       cdss["grade_probabilities"],
+            "outcome_range":             cdss["outcome_range"],
+            "surgical_note":             cdss["surgical_note"],
+            "disclaimer":                cdss["disclaimer"],
+        }
         return JSONResponse(
             content={
-                "clinical_report": volume_report,
+                "clinical_report": clinical_report,
                 "model_glb_base64": glb_base64,
                 "message": "Segmentation successful.",
             }
@@ -381,3 +398,7 @@ async def segment_and_analyze(file: UploadFile = File(...)):
     finally:
         print(f"[NeuroVista] Cleaning up: {temp_dir}")
         shutil.rmtree(temp_dir, ignore_errors=True)
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="127.0.0.1", port=8000)
