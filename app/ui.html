@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeuroVista AI — CDSS Dashboard</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --color-background-primary:#ffffff;
+  --color-background-secondary:#f5f5f5;
+  --color-background-tertiary:#efefef;
+  --color-background-info:#e6f1fb;
+  --color-background-danger:#fcebeb;
+  --color-background-warning:#faeeda;
+  --color-background-success:#eaf3de;
+  --color-text-primary:#1a1a1a;
+  --color-text-secondary:#666666;
+  --color-text-tertiary:#999999;
+  --color-text-info:#185fa5;
+  --color-text-danger:#a32d2d;
+  --color-text-warning:#854f0b;
+  --color-text-success:#3b6d11;
+  --color-border-tertiary:rgba(0,0,0,0.1);
+  --color-border-secondary:rgba(0,0,0,0.18);
+  --color-border-info:rgba(24,95,165,0.3);
+  --color-border-danger:rgba(163,45,45,0.3);
+  --color-border-warning:rgba(133,79,11,0.3);
+  --color-border-success:rgba(59,109,17,0.3);
+  --font-sans:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --font-mono:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;
+  --border-radius-md:8px;
+  --border-radius-lg:12px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --color-background-primary:#1a1a1a;
+    --color-background-secondary:#242424;
+    --color-background-tertiary:#2a2a2a;
+    --color-background-info:#0c2a4a;
+    --color-background-danger:#3a1a1a;
+    --color-background-warning:#3a2800;
+    --color-background-success:#1a2e0a;
+    --color-text-primary:#e8e8e8;
+    --color-text-secondary:#999999;
+    --color-text-tertiary:#666666;
+    --color-text-info:#85b7eb;
+    --color-text-danger:#f09595;
+    --color-text-warning:#fac775;
+    --color-text-success:#97c459;
+    --color-border-tertiary:rgba(255,255,255,0.1);
+    --color-border-secondary:rgba(255,255,255,0.18);
+    --color-border-info:rgba(133,183,235,0.3);
+    --color-border-danger:rgba(240,149,149,0.3);
+    --color-border-warning:rgba(250,199,117,0.3);
+    --color-border-success:rgba(151,196,89,0.3);
+  }
+}
+
+html,body{height:100%}
+body{font-family:var(--font-sans);color:var(--color-text-primary);background:var(--color-background-tertiary);display:flex;flex-direction:column}
+
+/* ── Topbar ── */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:0.5px solid var(--color-border-tertiary);background:var(--color-background-primary);position:sticky;top:0;z-index:20}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-mark{width:30px;height:30px;border-radius:var(--border-radius-md);background:var(--color-background-info);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:var(--color-text-info)}
+.logo-name{font-size:14px;font-weight:500}
+.logo-sub{font-size:11px;color:var(--color-text-secondary);font-family:var(--font-mono);margin-top:1px}
+.status-pill{display:flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:11px;color:var(--color-text-success);background:var(--color-background-success);border:0.5px solid var(--color-border-success);padding:4px 10px;border-radius:20px}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--color-text-success);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+
+/* ── Shell ── */
+.main{display:flex;flex:1;min-height:0}
+.sidebar{width:200px;min-width:200px;background:var(--color-background-primary);border-right:0.5px solid var(--color-border-tertiary);padding:12px 8px;display:flex;flex-direction:column;gap:2px}
+.sidebar-label{font-size:10px;color:var(--color-text-tertiary);letter-spacing:0.1em;text-transform:uppercase;font-family:var(--font-mono);padding:8px 8px 4px}
+.nav-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:var(--border-radius-md);cursor:pointer;font-size:12px;color:var(--color-text-secondary);border:0.5px solid transparent;user-select:none;transition:all 0.1s}
+.nav-item:hover{background:var(--color-background-secondary);color:var(--color-text-primary)}
+.nav-item.active{color:var(--color-text-info);background:var(--color-background-info);border-color:var(--color-border-info)}
+.content{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;background:var(--color-background-tertiary)}
+
+/* ── Pages ── */
+.page{display:none;flex-direction:column;gap:12px;flex:1}
+.page.active{display:flex}
+
+/* ── Upload ── */
+.upload-zone{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;border:1.5px dashed var(--color-border-secondary);border-radius:var(--border-radius-lg);padding:48px 20px;background:var(--color-background-primary);cursor:pointer;transition:border-color 0.15s,background 0.15s;text-align:center}
+.upload-zone:hover,.upload-zone.dragover{border-color:var(--color-text-info);background:var(--color-background-info)}
+.upload-zone input[type=file]{display:none}
+.upload-title{font-size:14px;font-weight:500}
+.upload-sub{font-size:12px;color:var(--color-text-secondary)}
+.upload-btn{padding:8px 20px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-secondary);font-size:12px;font-family:var(--font-sans);color:var(--color-text-primary);cursor:pointer;transition:background 0.15s}
+.upload-btn:hover{background:var(--color-background-tertiary)}
+
+/* ── Progress ── */
+.processing-bar{display:flex;flex-direction:column;gap:8px;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:14px 16px}
+.progress-track{height:3px;background:var(--color-background-tertiary);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:var(--color-text-info);border-radius:2px;transition:width 0.4s ease;width:0%}
+.progress-label{font-size:11px;color:var(--color-text-secondary);font-family:var(--font-mono)}
+
+/* ── Patient bar ── */
+.patient-bar{display:flex;align-items:center;justify-content:space-between;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:12px 16px}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--color-background-info);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:var(--color-text-info)}
+.p-name{font-size:13px;font-weight:500}
+.p-meta{font-size:11px;color:var(--color-text-secondary);font-family:var(--font-mono);margin-top:2px}
+.triage-badge{display:flex;align-items:center;gap:6px;border-radius:var(--border-radius-md);padding:6px 12px;font-size:11px;font-weight:500;font-family:var(--font-mono);letter-spacing:0.06em;border:0.5px solid}
+.triage-URGENT{background:var(--color-background-danger);border-color:var(--color-border-danger);color:var(--color-text-danger)}
+.triage-EXPEDITED{background:var(--color-background-warning);border-color:var(--color-border-warning);color:var(--color-text-warning)}
+.triage-ROUTINE{background:var(--color-background-success);border-color:var(--color-border-success);color:var(--color-text-success)}
+
+/* ── Cards / grids ── */
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:14px 16px}
+.card-label{font-size:10px;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:0.1em;font-family:var(--font-mono);margin-bottom:8px}
+.metric-big{font-size:24px;font-weight:500;font-family:var(--font-mono);line-height:1}
+.metric-unit{font-size:11px;color:var(--color-text-secondary);margin-top:3px}
+.bar-bg{height:3px;background:var(--color-background-tertiary);border-radius:2px;overflow:hidden;margin-top:10px}
+.bar-fill{height:100%;border-radius:2px;transition:width 0.6s ease}
+
+/* ── Segmentation ── */
+.seg-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.seg-label{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--color-text-secondary)}
+.seg-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+.seg-val{font-family:var(--font-mono);font-size:11px;color:var(--color-text-secondary)}
+
+/* ── Grade bars ── */
+.grade-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.grade-lbl{font-family:var(--font-mono);font-size:10px;color:var(--color-text-secondary);width:52px}
+.grade-bg{flex:1;height:4px;background:var(--color-background-tertiary);border-radius:2px;overflow:hidden}
+.grade-pct{font-family:var(--font-mono);font-size:10px;color:var(--color-text-secondary);width:28px;text-align:right}
+
+/* ── Derived metrics row ── */
+.metric-row{display:flex;gap:10px;flex-wrap:wrap}
+.metric-chip{flex:1;min-width:120px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px}
+.metric-chip-label{font-size:10px;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:0.08em;font-family:var(--font-mono)}
+.metric-chip-val{font-size:18px;font-weight:500;font-family:var(--font-mono);margin-top:3px}
+
+/* ── Warnings ── */
+.warn-list{display:flex;flex-direction:column;gap:6px}
+.warn-item{display:flex;align-items:flex-start;gap:8px;background:var(--color-background-warning);border:0.5px solid var(--color-border-warning);border-radius:var(--border-radius-md);padding:8px 10px}
+.warn-icon{width:14px;height:14px;flex-shrink:0;margin-top:1px}
+.warn-text{font-size:11px;color:var(--color-text-primary);line-height:1.55}
+
+/* ── Info / text cards ── */
+.info-block{font-size:12px;color:var(--color-text-secondary);line-height:1.65}
+.info-highlight{color:var(--color-text-primary);font-weight:500}
+.divider{height:0.5px;background:var(--color-border-tertiary);margin:10px 0}
+.disclaimer{display:flex;align-items:flex-start;gap:8px;background:var(--color-background-info);border:0.5px solid var(--color-border-info);border-radius:var(--border-radius-md);padding:10px 14px;font-size:11px;color:var(--color-text-info);font-family:var(--font-mono);line-height:1.6}
+
+/* ── Error ── */
+.error-box{display:flex;align-items:flex-start;gap:10px;background:var(--color-background-danger);border:0.5px solid var(--color-border-danger);border-radius:var(--border-radius-lg);padding:14px 16px;font-size:12px;color:var(--color-text-danger);line-height:1.6}
+
+/* ── 3D Viewer ── */
+.viewer-shell{display:flex;flex-direction:column;gap:10px;flex:1}
+#three-canvas-wrap{width:100%;aspect-ratio:16/9;background:#0d1117;border-radius:var(--border-radius-lg);border:0.5px solid var(--color-border-tertiary);overflow:hidden;position:relative}
+#three-canvas-wrap canvas{display:block;width:100%!important;height:100%!important}
+.viewer-hint{font-size:11px;color:var(--color-text-tertiary);font-family:var(--font-mono);text-align:center}
+.viewer-legend{display:flex;gap:16px;flex-wrap:wrap;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:10px 16px;align-items:center}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--color-text-secondary)}
+.legend-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.viewer-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;height:100%;color:var(--color-text-tertiary);font-size:12px;font-family:var(--font-mono)}
+
+/* ── Utility ── */
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+
+<!-- ═══ TOPBAR ═══ -->
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-mark">NV</div>
+    <div>
+      <div class="logo-name">NeuroVista AI</div>
+      <div class="logo-sub">Clinical Decision Support · v1.0</div>
+    </div>
+  </div>
+  <div class="status-pill"><div class="dot"></div><span id="status-text">System online</span></div>
+</div>
+
+<div class="main">
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <div class="sidebar">
+    <div class="sidebar-label">Navigation</div>
+    <div class="nav-item active" id="nav-cdss" onclick="switchPage('cdss')">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="8" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="1" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="8" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>
+      CDSS Dashboard
+    </div>
+    <div class="nav-item" id="nav-3d" onclick="switchPage('viewer')">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1L13 4V10L7 13L1 10V4L7 1Z" stroke="currentColor" stroke-width="1.2"/></svg>
+      3D Viewer
+    </div>
+    <div class="sidebar-label">Actions</div>
+    <div class="nav-item" id="nav-upload" onclick="resetToUpload()">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2H9L12 5V12H2V2Z" stroke="currentColor" stroke-width="1.2"/><path d="M9 2V5H12" stroke="currentColor" stroke-width="1.2"/></svg>
+      New study
+    </div>
+  </div>
+
+  <!-- ═══ CONTENT ═══ -->
+  <div class="content">
+
+    <!-- ─── PAGE: Upload ─── -->
+    <div class="page active" id="page-upload">
+      <label class="upload-zone" id="drop-zone">
+        <input type="file" id="file-input" accept=".zip">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><rect x="4" y="8" width="24" height="18" rx="2" stroke="var(--color-text-secondary)" stroke-width="1.5"/><path d="M16 20V12M16 12L12 16M16 12L20 16" stroke="var(--color-text-info)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 6H22" stroke="var(--color-text-tertiary)" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <div>
+          <div class="upload-title">Upload DICOM study</div>
+          <div class="upload-sub" style="margin-top:4px">ZIP file containing FLAIR, T1w, T1wCE, T2w series folders</div>
+        </div>
+        <button class="upload-btn" onclick="event.preventDefault();document.getElementById('file-input').click()">Choose file</button>
+        <div id="file-name" style="font-size:11px;color:var(--color-text-secondary);font-family:var(--font-mono)"></div>
+      </label>
+    </div>
+
+    <!-- ─── PAGE: Processing ─── -->
+    <div class="page" id="page-processing">
+      <div class="processing-bar">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:13px;font-weight:500">Processing study…</span>
+          <span class="progress-label" id="proc-pct">0%</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+        <div class="progress-label" id="proc-step">Uploading file…</div>
+      </div>
+    </div>
+
+    <!-- ─── PAGE: Error ─── -->
+    <div class="page" id="page-error">
+      <div class="error-box">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;margin-top:1px"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.2"/><path d="M8 5V8.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="8" cy="11" r="0.7" fill="currentColor"/></svg>
+        <div>
+          <div style="font-weight:500;margin-bottom:4px">Analysis failed</div>
+          <div id="error-msg">An unexpected error occurred.</div>
+          <div style="margin-top:8px"><button class="upload-btn" onclick="resetToUpload()">Try again</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── PAGE: CDSS Dashboard ─── -->
+    <div class="page" id="page-cdss">
+
+      <!-- Patient bar -->
+      <div class="patient-bar">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="avatar" id="res-avatar">--</div>
+          <div>
+            <div class="p-name" id="res-filename">Study</div>
+            <div class="p-meta" id="res-meta">--</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="font-size:11px;color:var(--color-text-secondary);font-family:var(--font-mono);text-align:right" id="res-timing">--</div>
+          <div class="triage-badge triage-ROUTINE" id="res-triage">--</div>
+        </div>
+      </div>
+
+      <!-- Row 1: key metrics -->
+      <div class="grid3">
+        <div class="card">
+          <div class="card-label">Total lesion volume</div>
+          <div class="metric-big" id="res-vol-total" style="color:var(--color-text-danger)">--</div>
+          <div class="metric-unit" id="res-vol-cm">--</div>
+          <div class="bar-bg"><div class="bar-fill" id="bar-vol" style="width:0%;background:var(--color-text-danger)"></div></div>
+        </div>
+        <div class="card">
+          <div class="card-label">Malignancy likelihood</div>
+          <div class="metric-big" id="res-malignancy" style="color:var(--color-text-warning)">--</div>
+          <div class="metric-unit" id="res-grade-hint">--</div>
+          <div class="bar-bg"><div class="bar-fill" id="bar-malignancy" style="width:0%;background:var(--color-text-warning)"></div></div>
+        </div>
+        <div class="card">
+          <div class="card-label">Grade classification</div>
+          <div class="grade-row" style="margin-top:4px">
+            <div class="grade-lbl">WHO I–II</div>
+            <div class="grade-bg"><div id="bar-who12" style="height:100%;width:0%;border-radius:2px;background:var(--color-text-success);transition:width 0.6s ease"></div></div>
+            <div class="grade-pct" id="pct-who12">--%</div>
+          </div>
+          <div class="grade-row">
+            <div class="grade-lbl">WHO III</div>
+            <div class="grade-bg"><div id="bar-who3" style="height:100%;width:0%;border-radius:2px;background:var(--color-text-warning);transition:width 0.6s ease"></div></div>
+            <div class="grade-pct" id="pct-who3">--%</div>
+          </div>
+          <div class="grade-row">
+            <div class="grade-lbl">WHO IV</div>
+            <div class="grade-bg"><div id="bar-who4" style="height:100%;width:0%;border-radius:2px;background:var(--color-text-danger);transition:width 0.6s ease"></div></div>
+            <div class="grade-pct" id="pct-who4">--%</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 2: derived metrics chips -->
+      <div class="card">
+        <div class="card-label">Derived metrics</div>
+        <div class="metric-row">
+          <div class="metric-chip">
+            <div class="metric-chip-label">Tumour core (TC)</div>
+            <div class="metric-chip-val" id="chip-total-core">--</div>
+            <div style="font-size:10px;color:var(--color-text-tertiary);margin-top:2px">necrotic + enhancing mm³</div>
+          </div>
+          <div class="metric-chip">
+            <div class="metric-chip-label">Enhancing fraction</div>
+            <div class="metric-chip-val" id="chip-enh-frac">--</div>
+            <div style="font-size:10px;color:var(--color-text-tertiary);margin-top:2px">% of tumour core that enhances</div>
+          </div>
+          <div class="metric-chip">
+            <div class="metric-chip-label">Inference time</div>
+            <div class="metric-chip-val" id="chip-inference">--</div>
+            <div style="font-size:10px;color:var(--color-text-tertiary);margin-top:2px">seconds</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 3: segmentation breakdown + warnings -->
+      <div class="grid2">
+        <div class="card">
+          <div class="card-label">Segmentation breakdown</div>
+          <div class="seg-row">
+            <div class="seg-label"><div class="seg-dot" style="background:#ff3232"></div>Enhancing tumour</div>
+            <div class="seg-val" id="seg-enhancing">--</div>
+          </div>
+          <div class="bar-bg" style="margin-bottom:10px"><div class="bar-fill" id="bar-enhancing" style="width:0%;background:#ff3232"></div></div>
+          <div class="seg-row">
+            <div class="seg-label"><div class="seg-dot" style="background:#a01414"></div>Necrotic core</div>
+            <div class="seg-val" id="seg-core">--</div>
+          </div>
+          <div class="bar-bg" style="margin-bottom:10px"><div class="bar-fill" id="bar-core" style="width:0%;background:#a01414"></div></div>
+          <div class="seg-row">
+            <div class="seg-label"><div class="seg-dot" style="background:#d4a800"></div>Peritumoral edema</div>
+            <div class="seg-val" id="seg-edema">--</div>
+          </div>
+          <div class="bar-bg"><div class="bar-fill" id="bar-edema" style="width:0%;background:#d4a800"></div></div>
+        </div>
+
+        <div class="card">
+          <div class="card-label">Clinical warnings</div>
+          <div class="warn-list" id="warn-list">
+            <div style="font-size:12px;color:var(--color-text-secondary)">No warnings generated.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 4: outcome + surgical note -->
+      <div class="grid2">
+        <div class="card">
+          <div class="card-label">Estimated outcome range</div>
+          <div class="info-block" id="res-outcome">--</div>
+          <div class="divider"></div>
+          <div class="info-block" style="font-size:11px;color:var(--color-text-secondary)">
+            Range depends on MGMT methylation status, resection extent, and adjuvant therapy response. Molecular profiling strongly recommended.
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-label">Surgical note</div>
+          <div class="info-block" id="res-surgical">--</div>
+          <div class="divider"></div>
+          <div class="info-block" style="font-size:11px;color:var(--color-text-secondary)">
+            Intraoperative neuromonitoring recommended. Extent of resection vs. functional preservation to be assessed by operating neurosurgeon.
+          </div>
+        </div>
+      </div>
+
+      <!-- Disclaimer -->
+      <div class="disclaimer" id="res-disclaimer">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;margin-top:1px"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M7 6V10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="7" cy="4.5" r="0.6" fill="currentColor"/></svg>
+        <span id="disclaimer-text">AI-assisted analysis only · Not a substitute for clinical judgment · All outputs require radiologist and neurosurgeon validation before clinical action · Nextar NeuroVista AI v1.0 · BraTS-derived model</span>
+      </div>
+
+    </div>
+    <!-- /page-cdss -->
+
+    <!-- ─── PAGE: 3D Viewer ─── -->
+    <div class="page" id="page-viewer">
+      <div class="viewer-shell">
+
+        <div id="three-canvas-wrap">
+          <div class="viewer-placeholder" id="viewer-placeholder">
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><path d="M20 4L36 12V28L20 36L4 28V12L20 4Z" stroke="currentColor" stroke-width="1.5"/><path d="M20 4V36M4 12L36 12M4 28L36 28" stroke="currentColor" stroke-width="1" stroke-dasharray="3 3"/></svg>
+            <div>No study loaded — upload a DICOM study first</div>
+          </div>
+        </div>
+
+        <div class="viewer-hint">Drag to rotate · Scroll to zoom · Right-drag to pan</div>
+
+        <div class="viewer-legend">
+          <div style="font-size:11px;font-weight:500;color:var(--color-text-secondary);margin-right:4px">Legend</div>
+          <div class="legend-item"><div class="legend-dot" style="background:rgba(160,180,200,0.5)"></div>Brain shell</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#ffd700"></div>Peritumoral edema</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#a01414"></div>Necrotic core</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#ff3232"></div>Enhancing tumour</div>
+        </div>
+
+      </div>
+    </div>
+    <!-- /page-viewer -->
+
+  </div>
+  <!-- /content -->
+</div>
+<!-- /main -->
+
+<!-- Three.js r128 + GLTFLoader -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ─── CONFIG ────────────────────────────────────────────────────────────────
+const API_BASE = 'http://localhost:8000';
+const ENDPOINT = `${API_BASE}/segment-and-analyze/`;
+
+// ─── STATE ─────────────────────────────────────────────────────────────────
+let inferenceStart  = null;
+let currentFile     = null;
+let glbBase64Global = null;
+let threeRenderer   = null;
+let threeScene      = null;
+let threeCamera     = null;
+let threeAnimId     = null;
+
+// ─── PAGE SWITCHING ─────────────────────────────────────────────────────────
+function switchPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+  const pageMap = { cdss:'page-cdss', viewer:'page-viewer', upload:'page-upload', processing:'page-processing', error:'page-error' };
+  const navMap  = { cdss:'nav-cdss', viewer:'nav-3d', upload:'nav-upload' };
+
+  const pageEl = document.getElementById(pageMap[name]);
+  if (pageEl) pageEl.classList.add('active');
+
+  const navEl = document.getElementById(navMap[name]);
+  if (navEl) navEl.classList.add('active');
+
+  // Initialise Three.js lazily when viewer tab first opens
+  if (name === 'viewer') {
+    initThreeIfNeeded();
+    if (glbBase64Global) loadGlbIntoScene(glbBase64Global);
+  }
+}
+
+function resetToUpload() {
+  currentFile     = null;
+  glbBase64Global = null;
+  document.getElementById('file-name').textContent = '';
+  document.getElementById('file-input').value = '';
+  setProgress(0, 'Ready');
+  // Clear 3D scene
+  if (threeScene) { while(threeScene.children.length) threeScene.remove(threeScene.children[0]); }
+  document.getElementById('viewer-placeholder').style.display = 'flex';
+  switchPage('upload');
+}
+
+// ─── PROGRESS ───────────────────────────────────────────────────────────────
+function setProgress(pct, label) {
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('proc-pct').textContent = pct + '%';
+  document.getElementById('proc-step').textContent = label;
+}
+
+// ─── FILE INPUT ─────────────────────────────────────────────────────────────
+document.getElementById('file-input').addEventListener('change', e => {
+  const f = e.target.files[0];
+  if (!f) return;
+  if (!f.name.endsWith('.zip')) { showError('Please upload a ZIP file.'); return; }
+  currentFile = f;
+  document.getElementById('file-name').textContent = f.name;
+  submitFile(f);
+});
+
+const dropZone = document.getElementById('drop-zone');
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault(); dropZone.classList.remove('dragover');
+  const f = e.dataTransfer.files[0];
+  if (!f) return;
+  if (!f.name.endsWith('.zip')) { showError('Please upload a ZIP file.'); return; }
+  currentFile = f;
+  document.getElementById('file-name').textContent = f.name;
+  submitFile(f);
+});
+
+// ─── SUBMIT ─────────────────────────────────────────────────────────────────
+async function submitFile(file) {
+  switchPage('processing');
+  inferenceStart = performance.now();
+  setProgress(5, 'Uploading file…');
+
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const steps = [
+    [10, 'Extracting DICOM series…'],
+    [25, 'Converting to NIfTI…'],
+    [40, 'Preprocessing MRI modalities…'],
+    [60, 'Running 3D U-Net inference…'],
+    [78, 'Building Gaussian-smoothed meshes…'],
+    [90, 'Running clinical decision support…'],
+  ];
+  let si = 0;
+  const timer = setInterval(() => {
+    if (si < steps.length) { setProgress(steps[si][0], steps[si][1]); si++; }
+  }, 3500);
+
+  try {
+    const resp = await fetch(ENDPOINT, { method:'POST', body:formData });
+    clearInterval(timer);
+
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err.error || `Server error ${resp.status}`);
+    }
+
+    setProgress(100, 'Analysis complete.');
+    const data = await resp.json();
+    glbBase64Global = data.model_glb_base64 || null;
+
+    await new Promise(r => setTimeout(r, 400));
+    renderResults(data, file.name);
+
+  } catch(err) {
+    clearInterval(timer);
+    showError(err.message || 'Could not reach the NeuroVista API.');
+  }
+}
+
+// ─── RENDER RESULTS ─────────────────────────────────────────────────────────
+function renderResults(data, filename) {
+  const cr   = data.clinical_report;
+  const vols = cr.volumes_mm3;
+  const dm   = cr.derived_metrics;
+  const meta = cr.metadata || {};
+
+  const inferenceTime = meta.inference_time_seconds
+    ? meta.inference_time_seconds.toFixed(1)
+    : ((performance.now() - inferenceStart) / 1000).toFixed(1);
+
+  // ── Patient bar ──
+  const initials = filename.replace('.zip','').slice(0,2).toUpperCase();
+  document.getElementById('res-avatar').textContent   = initials;
+  document.getElementById('res-filename').textContent = filename.replace('.zip','');
+  document.getElementById('res-meta').textContent     = `Study uploaded · ${new Date().toISOString().slice(0,10)}`;
+  document.getElementById('res-timing').textContent   = `Inference: ${inferenceTime}s`;
+
+  // ── Triage ──
+  const triageEl = document.getElementById('res-triage');
+  triageEl.textContent = cr.triage_band;
+  triageEl.className   = `triage-badge triage-${cr.triage_band}`;
+
+  // ── Total volume ──
+  const totalMm3 = vols.total_tumor;
+  const totalCm3 = (totalMm3 / 1000).toFixed(1);
+  document.getElementById('res-vol-total').textContent = Math.round(totalMm3).toLocaleString();
+  document.getElementById('res-vol-cm').textContent    = `mm³ · ${totalCm3} cm³`;
+  document.getElementById('bar-vol').style.width       = Math.min((totalMm3 / 80000) * 100, 100).toFixed(1) + '%';
+
+  // ── Malignancy ──
+  const mal = cr.malignancy_likelihood_pct;
+  document.getElementById('res-malignancy').innerHTML  = `${mal}<span style="font-size:14px;color:var(--color-text-secondary)">%</span>`;
+  document.getElementById('res-grade-hint').textContent = cr.grade_hint;
+  document.getElementById('bar-malignancy').style.width = mal + '%';
+
+  // ── Grade probabilities ──
+  const gp = cr.grade_probabilities;
+  document.getElementById('bar-who12').style.width = gp.WHO_I_II + '%';
+  document.getElementById('bar-who3').style.width  = gp.WHO_III  + '%';
+  document.getElementById('bar-who4').style.width  = gp.WHO_IV   + '%';
+  document.getElementById('pct-who12').textContent = gp.WHO_I_II + '%';
+  document.getElementById('pct-who3').textContent  = gp.WHO_III  + '%';
+  document.getElementById('pct-who4').textContent  = gp.WHO_IV   + '%';
+
+  // ── Derived metrics ──
+  document.getElementById('chip-total-core').textContent = Math.round(dm.total_core).toLocaleString() + ' mm³';
+  document.getElementById('chip-enh-frac').textContent   = dm.enhancing_fraction.toFixed(1) + '%';
+  document.getElementById('chip-inference').textContent  = inferenceTime + 's';
+
+  // ── Segmentation breakdown ──
+  // Colours match BraTS convention used in backend: edema=gold, necrotic=dark red, enhancing=bright red
+  const enh  = vols.enhancing_tumor;
+  const necr = vols.necrotic_core;
+  const edem = vols.edema;
+  const enhPct  = totalMm3 > 0 ? ((enh  / totalMm3) * 100).toFixed(1) : 0;
+  const necrPct = totalMm3 > 0 ? ((necr / totalMm3) * 100).toFixed(1) : 0;
+  const edemPct = totalMm3 > 0 ? ((edem / totalMm3) * 100).toFixed(1) : 0;
+
+  document.getElementById('seg-enhancing').textContent = `${Math.round(enh).toLocaleString()} mm³ · ${enhPct}%`;
+  document.getElementById('seg-core').textContent      = `${Math.round(necr).toLocaleString()} mm³ · ${necrPct}%`;
+  document.getElementById('seg-edema').textContent     = `${Math.round(edem).toLocaleString()} mm³ · ${edemPct}%`;
+  document.getElementById('bar-enhancing').style.width = enhPct + '%';
+  document.getElementById('bar-core').style.width      = necrPct + '%';
+  document.getElementById('bar-edema').style.width     = edemPct + '%';
+
+  // ── Warnings — merge QA warnings (from processing.py) + display ──
+  const qaWarnings = (meta.warnings || []);
+  const allWarnings = [...qaWarnings];
+  const warnList = document.getElementById('warn-list');
+  if (allWarnings.length > 0) {
+    warnList.innerHTML = allWarnings.map(w => `
+      <div class="warn-item">
+        <svg class="warn-icon" viewBox="0 0 14 14" fill="none">
+          <path d="M7 1L13 10H1L7 1Z" stroke="var(--color-text-warning)" stroke-width="1.2"/>
+          <path d="M7 5.5V7.5" stroke="var(--color-text-warning)" stroke-width="1.2" stroke-linecap="round"/>
+          <circle cx="7" cy="9" r="0.6" fill="var(--color-text-warning)"/>
+        </svg>
+        <div class="warn-text">${escHtml(w)}</div>
+      </div>`).join('');
+  } else {
+    warnList.innerHTML = '<div style="font-size:12px;color:var(--color-text-secondary)">No clinical warnings generated.</div>';
+  }
+
+  // ── Outcome range ──
+  const outcomeText = cr.outcome_range || '--';
+  document.getElementById('res-outcome').innerHTML =
+    outcomeText.replace(/(\d+[–\-]\d+\s*months?)/gi,
+      '<span style="color:var(--color-text-warning);font-family:var(--font-mono)">$1</span>');
+
+  // ── Surgical note ──
+  document.getElementById('res-surgical').textContent = cr.surgical_note || '--';
+
+  // ── Disclaimer from backend ──
+  if (cr.disclaimer) {
+    document.getElementById('disclaimer-text').textContent = cr.disclaimer;
+  }
+
+  switchPage('cdss');
+}
+
+// ─── ERROR ───────────────────────────────────────────────────────────────────
+function showError(msg) {
+  document.getElementById('error-msg').textContent = msg;
+  switchPage('error');
+}
+
+// ─── THREE.JS SETUP ──────────────────────────────────────────────────────────
+function initThreeIfNeeded() {
+  if (threeRenderer) return;
+
+  const wrap = document.getElementById('three-canvas-wrap');
+  const W = wrap.clientWidth  || 800;
+  const H = wrap.clientHeight || 450;
+
+  threeRenderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
+  threeRenderer.setSize(W, H);
+  threeRenderer.setPixelRatio(window.devicePixelRatio);
+  threeRenderer.setClearColor(0x0d1117, 1);
+  wrap.appendChild(threeRenderer.domElement);
+
+  threeScene  = new THREE.Scene();
+  threeCamera = new THREE.PerspectiveCamera(50, W / H, 0.1, 2000);
+  threeCamera.position.set(0, 0, 300);
+
+  // Lights
+  const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+  const dirA = new THREE.DirectionalLight(0xffffff, 0.8);
+  dirA.position.set(1, 2, 3);
+  const dirB = new THREE.DirectionalLight(0x8899cc, 0.4);
+  dirB.position.set(-2, -1, -1);
+  threeScene.add(ambient, dirA, dirB);
+
+  // Orbit controls (manual — no OrbitControls CDN needed)
+  let isDragging = false, isRightDrag = false;
+  let prevX = 0, prevY = 0;
+  let rotX = 0, rotY = 0;
+  let panX = 0, panY = 0;
+  let zoom = 300;
+  const pivot = new THREE.Group();
+  threeScene.add(pivot);
+
+  threeRenderer.domElement.addEventListener('mousedown', e => {
+    isDragging  = true;
+    isRightDrag = e.button === 2;
+    prevX = e.clientX; prevY = e.clientY;
+  });
+  threeRenderer.domElement.addEventListener('contextmenu', e => e.preventDefault());
+  window.addEventListener('mouseup', () => { isDragging = false; });
+  window.addEventListener('mousemove', e => {
+    if (!isDragging) return;
+    const dx = e.clientX - prevX, dy = e.clientY - prevY;
+    prevX = e.clientX; prevY = e.clientY;
+    if (isRightDrag) {
+      panX += dx * 0.4; panY -= dy * 0.4;
+    } else {
+      rotY += dx * 0.4; rotX += dy * 0.4;
+    }
+    pivot.rotation.x = THREE.MathUtils.degToRad(rotX);
+    pivot.rotation.y = THREE.MathUtils.degToRad(rotY);
+    threeCamera.position.set(panX, panY, zoom);
+  });
+  threeRenderer.domElement.addEventListener('wheel', e => {
+    zoom = Math.max(50, Math.min(800, zoom + e.deltaY * 0.5));
+    threeCamera.position.set(panX, panY, zoom);
+  });
+
+  // Animate
+  function animate() {
+    threeAnimId = requestAnimationFrame(animate);
+    threeRenderer.render(threeScene, threeCamera);
+  }
+  animate();
+
+  // Resize
+  window.addEventListener('resize', () => {
+    const nW = wrap.clientWidth, nH = wrap.clientHeight;
+    threeRenderer.setSize(nW, nH);
+    threeCamera.aspect = nW / nH;
+    threeCamera.updateProjectionMatrix();
+  });
+}
+
+// ─── LOAD GLB INTO SCENE ────────────────────────────────────────────────────
+function loadGlbIntoScene(base64str) {
+  if (!threeScene || !base64str) return;
+
+  // Hide placeholder
+  document.getElementById('viewer-placeholder').style.display = 'none';
+
+  // Clear previous meshes (keep lights)
+  const toRemove = [];
+  threeScene.traverse(obj => { if (obj.isMesh || obj.isGroup) toRemove.push(obj); });
+  toRemove.forEach(obj => threeScene.remove(obj));
+
+  // Decode base64 → ArrayBuffer
+  const binary = atob(base64str);
+  const bytes  = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  const buffer = bytes.buffer;
+
+  // Minimal GLB parser using Three.js built-in loader
+  // Dynamically inject GLTFLoader since we only have r128 core
+  injectGltfLoader().then(loader => {
+    loader.parse(buffer, '', gltf => {
+      const model = gltf.scene;
+
+      // Enable transparency on all materials (the backend sets RGBA per face)
+      model.traverse(child => {
+        if (child.isMesh && child.material) {
+          child.material.transparent = true;
+          child.material.depthWrite  = false;
+          child.material.side        = THREE.DoubleSide;
+        }
+      });
+
+      // Centre the model
+      const box = new THREE.Box3().setFromObject(model);
+      const centre = box.getCenter(new THREE.Vector3());
+      model.position.sub(centre);
+
+      // Scale to fit nicely at zoom=300
+      const size = box.getSize(new THREE.Vector3());
+      const maxDim = Math.max(size.x, size.y, size.z);
+      const scale  = 180 / maxDim;
+      model.scale.setScalar(scale);
+
+      threeScene.add(model);
+    }, err => console.error('[NeuroVista] GLB parse error:', err));
+  });
+}
+
+// Inject GLTFLoader script once
+let gltfLoaderPromise = null;
+function injectGltfLoader() {
+  if (gltfLoaderPromise) return gltfLoaderPromise;
+  gltfLoaderPromise = new Promise((resolve, reject) => {
+    // THREE r128 GLTFLoader from CDN
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js';
+    s.onload = () => resolve(new THREE.GLTFLoader());
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+  return gltfLoaderPromise;
+}
+
+// ─── UTIL ────────────────────────────────────────────────────────────────────
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+</script>
+</body>
+</html>
