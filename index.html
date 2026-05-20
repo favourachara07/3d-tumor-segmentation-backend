@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Tumor Analysis</title>
+
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js" async></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* 1. Define CSS variables for themes */
+        :root {
+            --bg-color: #f3f4f6; 
+            --text-color: #111827; 
+            --text-muted: #6b7280; 
+            --border-color: #e5e7eb; 
+            --box-bg-color: #ffffff;
+            --button-primary-bg: #4f46e5; 
+            --button-primary-hover: #4338ca; 
+            --button-secondary-bg: #f3f4f6;
+            --button-secondary-text: #374151;
+            --button-secondary-hover: #e5e7eb;
+            --model-viewer-bg: #e5e7eb; 
+            --error-bg: #fef2f2;
+            --error-border: #f87171;
+            --error-text: #b91c1c;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --header-bg: rgba(255, 255, 255, 0.85);
+            --header-border: #e5e7eb;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #0f172a; 
+            --text-color: #f8fafc; 
+            --text-muted: #94a3b8; 
+            --border-color: #334155; 
+            --box-bg-color: #1e293b; 
+            --button-primary-bg: #6366f1; 
+            --button-primary-hover: #818cf8; 
+            --button-secondary-bg: #334155;
+            --button-secondary-text: #f8fafc;
+            --button-secondary-hover: #475569;
+            --model-viewer-bg: #0f172a; 
+            --error-bg: #450a0a;
+            --error-border: #7f1d1d;
+            --error-text: #fca5a5;
+            --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+            --header-bg: rgba(15, 23, 42, 0.85);
+            --header-border: #334155;
+        }
+
+        /* 3. Apply variables to layout */
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 20px 60px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s ease, color 0.3s ease;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Header */
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px 0;
+            margin-bottom: 8px;
+            border-bottom: 1px solid var(--header-border);
+            position: sticky;
+            top: 0;
+            background: var(--header-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 100;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0 0 4px 0;
+            letter-spacing: -0.02em;
+        }
+
+        header p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        /* Cards */
+        .card {
+            background-color: var(--box-bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+        }
+
+        .upload-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed var(--border-color);
+            background-color: transparent;
+            padding: 48px 24px;
+            border-radius: 16px;
+            transition: all 0.3s ease;
+        }
+        .upload-box:hover {
+            border-color: var(--button-primary-bg);
+            background-color: var(--box-bg-color);
+        }
+
+        .upload-box input[type="file"] {
+            margin-bottom: 24px;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+        .upload-box input[type="file"]::file-selector-button {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--button-secondary-bg);
+            color: var(--button-secondary-text);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            margin-right: 16px;
+            transition: all 0.2s;
+        }
+        .upload-box input[type="file"]::file-selector-button:hover {
+            background-color: var(--button-secondary-hover);
+        }
+
+        /* Buttons */
+        button {
+            font-family: 'Inter', sans-serif;
+            padding: 10px 20px;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        #upload-button, .process-sample-btn {
+            background-color: var(--button-primary-bg);
+            color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        #upload-button:hover:not(:disabled), .process-sample-btn:hover:not(:disabled) {
+            background-color: var(--button-primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+        }
+
+        .view-result-btn {
+            background-color: var(--button-secondary-bg);
+            color: var(--button-secondary-text);
+        }
+        .view-result-btn:hover:not(:disabled) {
+            background-color: var(--button-secondary-hover);
+            transform: translateY(-1px);
+        }
+
+        #theme-toggle {
+            background-color: var(--box-bg-color);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        #theme-toggle:hover {
+            background-color: var(--button-secondary-hover);
+        }
+
+        .samples-container {
+            text-align: center;
+        }
+        .samples-container h3 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 16px;
+            color: var(--text-muted);
+        }
+        .sample-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 10px;
+        }
+        
+        #error-message {
+            color: var(--error-text);
+            background-color: var(--error-bg);
+            padding: 16px;
+            border: 1px solid var(--error-border);
+            border-radius: 12px;
+            display: none;
+            font-size: 14px;
+            font-weight: 500;
+            text-align: center;
+        }
+        
+        #status {
+            text-align: center;
+            padding: 32px;
+        }
+        #status h3 {
+            margin-top: 0;
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+        #fun-fact {
+            color: var(--text-muted);
+            font-style: italic;
+            font-size: 14px;
+        }
+
+        /* Results section */
+        #results {
+            animation: fadeIn 0.5s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #results h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .metric-card {
+            background-color: var(--box-bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border-top: 4px solid var(--metric-color, #ccc);
+            transition: transform 0.2s;
+        }
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--card-shadow);
+        }
+        .metric-card strong {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+        .metric-card span {
+            font-size: 24px;
+            font-weight: 700;
+            font-family: monospace;
+            color: var(--text-color);
+        }
+        .metric-card .unit {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 400;
+            margin-left: 4px;
+        }
+        
+        model-viewer {
+            width: 100%;
+            height: 500px;
+            border-radius: 16px;
+            background-color: var(--model-viewer-bg);
+            transition: background-color 0.3s ease;
+            position: relative;
+            border: 1px solid var(--border-color);
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.05);
+            outline: none;
+        }
+
+        /* ── Hotspot Buttons ── */
+        .hotspot-btn {
+            display: block; width: 20px; height: 20px; border-radius: 50%;
+            border: 2px solid var(--hotspot-color, #fff);
+            background: rgba(0,0,0,0.4); backdrop-filter: blur(4px);
+            cursor: pointer; position: relative; padding: 0;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+        }
+        .hotspot-btn:hover { transform: scale(1.5); box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+        .hotspot-btn::before {
+            content: ''; position: absolute; inset: -6px; border-radius: 50%;
+            border: 1.5px solid var(--hotspot-color, #fff);
+            opacity: 0.5; animation: hs-pulse 2s ease-in-out infinite;
+        }
+        .hotspot-btn::after {
+            content: attr(data-label); position: absolute;
+            left: calc(100% + 10px); top: 50%; transform: translateY(-50%);
+            white-space: nowrap; font-size: 11px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: #fff; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+            padding: 4px 10px; border-radius: 5px;
+            opacity: 0; transition: opacity 0.15s; pointer-events: none;
+        }
+        .hotspot-btn:hover::after { opacity: 1; }
+        @keyframes hs-pulse { 0%,100%{opacity:0.5;transform:scale(1)} 50%{opacity:0;transform:scale(1.8)} }
+
+        /* ── Hover Emphasis ── */
+        model-viewer.region-focus {
+            box-shadow: inset 0 0 60px var(--focus-color, rgba(255,255,255,0.15)),
+                        0 0 30px var(--focus-color, rgba(255,255,255,0.08));
+            transition: box-shadow 0.3s ease;
+        }
+        model-viewer.region-focus .hotspot-btn:not(.active-hotspot) {
+            opacity: 0.3; transform: scale(0.7);
+        }
+        .hotspot-btn.active-hotspot {
+            transform: scale(1.8) !important;
+            box-shadow: 0 0 24px var(--hotspot-color, #fff), 0 0 48px var(--hotspot-color, #fff) !important;
+            z-index: 10;
+        }
+        .hotspot-btn.active-hotspot::before {
+            animation: hs-active-ring 1s ease-in-out infinite !important;
+            border-width: 2px;
+        }
+        @keyframes hs-active-ring { 0%,100%{opacity:0.7;transform:scale(1)} 50%{opacity:0.2;transform:scale(2.2)} }
+
+        /* ── Tooltip Card ── */
+        #mesh-tooltip {
+            position: fixed; z-index: 9999; pointer-events: none;
+            opacity: 0; transition: opacity 0.18s ease, transform 0.18s ease;
+            transform: translateY(6px); max-width: 320px; min-width: 230px;
+        }
+        #mesh-tooltip.visible { opacity: 1; transform: translateY(0); }
+        .tooltip-card {
+            background: rgba(22,22,30,0.93); backdrop-filter: blur(18px) saturate(1.4);
+            -webkit-backdrop-filter: blur(18px) saturate(1.4);
+            border: 0.5px solid rgba(255,255,255,0.12); border-radius: 12px;
+            padding: 0; overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5), 0 1px 4px rgba(0,0,0,0.25);
+            font-family: 'Inter', sans-serif;
+        }
+        .tt-accent { height: 4px; width: 100%; }
+        .tt-body { padding: 16px; }
+        .tt-title {
+            font-size: 14px; font-weight: 600; color: #f0f0f0;
+            margin-bottom: 4px; display: flex; align-items: center; gap: 8px;
+        }
+        .tt-title .tt-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+        .tt-subtitle {
+            font-size: 11px; color: rgba(255,255,255,0.5);
+            letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 12px;
+            font-weight: 500;
+        }
+        .tt-metrics { display: flex; flex-direction: column; gap: 6px; }
+        .tt-row { display: flex; justify-content: space-between; align-items: center; }
+        .tt-label { font-size: 12px; color: rgba(255,255,255,0.6); }
+        .tt-value { font-size: 13px; font-weight: 500; font-family: monospace; color: #fff; }
+        .tt-divider { height: 1px; background: rgba(255,255,255,0.1); margin: 12px 0; }
+        .tt-note { font-size: 11px; color: rgba(255,255,255,0.5); line-height: 1.6; }
+
+        /* ── Viewer extras ── */
+        .viewer-hint {
+            text-align: center; font-size: 12px; color: var(--text-muted);
+            margin-top: 12px; font-weight: 500;
+        }
+        .viewer-legend {
+            display: flex; gap: 20px; flex-wrap: wrap; justify-content: center;
+            margin-top: 12px; padding: 12px 0;
+        }
+        .legend-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); font-weight: 500; }
+        .legend-dot { width: 12px; height: 12px; border-radius: 4px; flex-shrink: 0; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1); }
+
+        /* ── Surgical Planning Button ── */
+        .surgical-toggle {
+            display: none; width: 100%; margin: 24px 0 12px;
+            padding: 16px 24px;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white; border: none; border-radius: 12px;
+            font-size: 15px; font-weight: 600; cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+            letter-spacing: 0.01em;
+        }
+        .surgical-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+        }
+        .surgical-toggle.active {
+            background: linear-gradient(135deg, #4338ca, #6d28d9);
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
+        }
+        .surgical-toggle .btn-icon { margin-right: 8px; font-size: 18px;}
+
+        /* ── Surgical Panel ── */
+        .surgical-panel {
+            display: none; border-radius: 16px;
+            border: 1px solid var(--border-color);
+            background: var(--box-bg-color);
+            padding: 24px; margin-top: 16px;
+            animation: panelSlide 0.35s ease;
+            box-shadow: var(--card-shadow);
+        }
+        .surgical-panel.visible { display: block; }
+        @keyframes panelSlide {
+            from { opacity: 0; transform: translateY(-10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .surgical-panel h3 {
+            font-size: 16px; margin-bottom: 20px; margin-top: 0;
+            display: flex; align-items: center; gap: 8px;
+            font-weight: 600;
+        }
+        .sp-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .sp-card {
+            background: var(--bg-color); border-radius: 12px;
+            padding: 20px; border-left: 4px solid var(--card-accent, #6366f1);
+            transition: transform 0.2s;
+            border-top: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+        .sp-card:hover { transform: translateY(-2px); }
+        .sp-label {
+            font-size: 11px; text-transform: uppercase;
+            letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .sp-value {
+            font-size: 28px; font-weight: 700;
+            font-family: monospace; line-height: 1.2;
+            color: var(--text-color);
+        }
+        .sp-unit { font-size: 14px; color: var(--text-muted); font-weight: 500; }
+        .sp-note { font-size: 12px; color: var(--text-muted); margin-top: 8px; line-height: 1.5; }
+        .sp-card.warning {
+            border-left-color: #ef4444 !important;
+            background: var(--error-bg);
+            border-color: var(--error-border);
+        }
+        .sp-card.warning .sp-value { color: var(--error-text); }
+        .sp-card.safe .sp-value { color: #22c55e; }
+        
+        .sp-bbox {
+            grid-column: 1 / -1;
+            display: flex; gap: 24px; justify-content: center;
+            text-align: center;
+            padding: 20px;
+            background: var(--bg-color);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+        .sp-dim { font-size: 12px; color: var(--text-muted); font-weight: 500;}
+        .sp-dim strong {
+            display: block; font-size: 20px; font-family: monospace;
+            color: var(--text-color); margin-top: 4px;
+        }
+
+        /* ── Surgical Hotspots ── */
+        .surg-hotspot {
+            display: none; width: 14px; height: 14px;
+            border: 2px solid var(--hs-color, #00dcff);
+            background: rgba(0,220,255,0.25);
+            border-radius: 3px; transform: rotate(45deg);
+            cursor: default; padding: 0;
+            box-shadow: 0 0 12px var(--hs-color, #00dcff);
+            position: relative;
+        }
+        .surg-hotspot.visible { display: block; }
+        .surg-hotspot::after {
+            content: attr(data-label); position: absolute;
+            left: calc(100% + 12px); top: 50%;
+            transform: translateY(-50%) rotate(-45deg);
+            white-space: nowrap; font-size: 11px;
+            font-family: 'Inter', monospace; font-weight: 500; color: #fff;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(6px);
+            padding: 4px 10px; border-radius: 6px;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-container">
+        <header>
+            <h1>3D Tumor Segmentation & Analysis</h1>
+            <p>Upload a ZIP file containing DICOM series to begin.</p>
+        </header>
+        <button id="theme-toggle">Light Mode</button>
+    </div>
+
+    <div class="card upload-box">
+        <input type="file" id="file-input" accept=".zip" />
+        <button id="upload-button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+            Analyze Scan
+        </button>
+    </div>
+    
+    <!-- Samples Section -->
+    <!-- <div class="card samples-container">
+        <h3>Don't have a file? Try processing a sample case.</h3>
+        <div class="sample-buttons">
+            <button id="process-sample-1-btn" class="process-sample-btn" data-url="./samples/BraTS20_Validation_001.zip">
+                Process Sample Patient 1
+            </button>
+        </div>
+    </div> -->
+
+    <!-- Instant View Section -->
+    <!-- <div class="card samples-container">
+        <h3>Or, instantly view a pre-processed result.</h3>
+        <div class="sample-buttons">
+            <button id="view-sample-1-btn" class="view-result-btn" 
+                    data-url="samples/BraTS20_Validation_001_1776254765.glb" 
+                    data-vol-total="15234.78"
+                    data-vol-edema="5000.00"
+                    data-vol-core="4000.00"
+                    data-vol-enhancing="6234.78">
+                View Sample Model 1
+            </button>
+        </div>
+    </div> -->
+
+    <div id="error-message"></div>
+
+    <div class="card" id="status" style="display: none;">
+        <h3>Processing Your Scan...</h3>
+        <p><i>Did you know?</i></p>
+        <p id="fun-fact"></p> 
+    </div>
+
+    <!-- Results Area -->
+    <div id="results" style="display: none;">
+        <h2>Analysis Results</h2>
+        
+        <div class="metrics-grid">
+            <div class="metric-card" style="--metric-color: #3b82f6;">
+                <strong>Total Volume</strong>
+                <div><span id="vol-total"></span><span class="unit">mm³</span></div>
+            </div>
+            <div class="metric-card" style="--metric-color: #eab308;">
+                <strong>Edema</strong>
+                <div><span id="vol-edema"></span><span class="unit">mm³</span></div>
+            </div>
+            <div class="metric-card" style="--metric-color: #ef4444;">
+                <strong>Enhancing</strong>
+                <div><span id="vol-enhancing"></span><span class="unit">mm³</span></div>
+            </div>
+             <div class="metric-card" style="--metric-color: #991b1b;">
+                <strong>Necrotic Core</strong>
+                <div><span id="vol-core"></span><span class="unit">mm³</span></div>
+            </div>
+        </div>
+        
+        <model-viewer
+            id="viewer"
+            alt="3D Brain and Tumor Analysis"
+            camera-controls
+            auto-rotate
+            environment-image="neutral"
+            shadow-intensity="1.5"
+            shadow-softness="0.5"
+            interaction-prompt="none"
+        ></model-viewer>
+
+        <div class="viewer-hint">Drag to rotate · Scroll to zoom · Hover the pulsing dots for clinical info</div>
+        <div class="viewer-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:rgba(160,180,200,0.5)"></div>Brain shell</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#eab308"></div>Edema</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#991b1b"></div>Necrotic core</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div>Enhancing tumour</div>
+        </div>
+
+        <!-- Surgical Planning Toggle -->
+        <button class="surgical-toggle" id="surgical-toggle" onclick="toggleSurgicalPanel()">
+            <span class="btn-icon">🔬</span> See AI Surgical Planning
+        </button>
+
+        <!-- Surgical Planning Panel -->
+        <div class="surgical-panel" id="surgical-panel">
+            <h3>🏥 AI Surgical Planning Assessment</h3>
+            <div class="sp-grid">
+                <div class="sp-card" id="sp-depth-card" style="--card-accent:#00dcff">
+                    <div class="sp-label">Minimal Cortical Depth</div>
+                    <div class="sp-value" id="sp-depth">— <span class="sp-unit">mm</span></div>
+                    <div class="sp-note">Shortest distance from tumour centroid to brain surface</div>
+                </div>
+                <div class="sp-card" id="sp-midline-card" style="--card-accent:#b4ff00">
+                    <div class="sp-label">Midline Proximity</div>
+                    <div class="sp-value" id="sp-midline">— <span class="sp-unit">mm</span></div>
+                    <div class="sp-note" id="sp-midline-note">Distance from tumour medial edge to mid-sagittal plane</div>
+                </div>
+                <div class="sp-bbox">
+                    <div class="sp-dim">Width (R↔L)<strong id="sp-bx">—</strong>mm</div>
+                    <div class="sp-dim">Height (A↔P)<strong id="sp-by">—</strong>mm</div>
+                    <div class="sp-dim">Depth (S↔I)<strong id="sp-bz">—</strong>mm</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hover Tooltip (positioned via JS) -->
+    <div id="mesh-tooltip">
+        <div class="tooltip-card">
+            <div class="tt-accent" id="tt-accent"></div>
+            <div class="tt-body">
+                <div class="tt-title"><div class="tt-dot" id="tt-dot"></div><span id="tt-title">—</span></div>
+                <div class="tt-subtitle" id="tt-subtitle">—</div>
+                <div class="tt-metrics">
+                    <div class="tt-row"><span class="tt-label">Volume</span><span class="tt-value" id="tt-volume">—</span></div>
+                    <div class="tt-row"><span class="tt-label">% of total lesion</span><span class="tt-value" id="tt-pct">—</span></div>
+                </div>
+                <div class="tt-divider"></div>
+                <div class="tt-note" id="tt-note">—</div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    // --- Element References ---
+    const fileInput = document.getElementById('file-input');
+    const uploadButton = document.getElementById('upload-button');
+    const statusDiv = document.getElementById('status');
+    const funFactP = document.getElementById('fun-fact'); 
+    const resultsDiv = document.getElementById('results');
+    
+    // Volume Result Spans (Level 2 Updates)
+    const volTotalSpan = document.getElementById('vol-total');
+    const volEdemaSpan = document.getElementById('vol-edema');
+    const volCoreSpan = document.getElementById('vol-core');
+    const volEnhancingSpan = document.getElementById('vol-enhancing');
+    
+    const modelViewer = document.getElementById('viewer');
+    const errorDiv = document.getElementById('error-message');
+    
+    const themeToggle = document.getElementById('theme-toggle');
+    const processSample1Btn = document.getElementById('process-sample-1-btn');
+    const viewSample1Btn = document.getElementById('view-sample-1-btn');
+
+    let funFactInterval;
+    let currentHovered = null;
+    let volumeData = null;
+    let meshCentroids = null;
+    let surgicalData = null;
+    let surgicalPanelOpen = false;
+
+    // ── Clinical metadata for each mesh region ──
+    const MESH_META = {
+        edema: {
+            title: 'Peritumoral Edema',
+            subtitle: 'Surrounding Swelling',
+            color: '#ffd700',
+            note: 'Represents vasogenic edema surrounding the tumour. Reflects blood-brain barrier disruption and local tissue infiltration. Extent correlates with mass effect severity.',
+        },
+        necrotic_core: {
+            title: 'Necrotic Core',
+            subtitle: 'Non-Enhancing Dead Tissue',
+            color: '#a01414',
+            note: 'Central tumour necrosis indicating rapid, out-growing blood supply. Larger necrotic cores are associated with higher-grade gliomas and poorer prognosis.',
+        },
+        enhancing_tumor: {
+            title: 'Enhancing Tumour',
+            subtitle: 'Active Core',
+            color: '#ff3232',
+            note: 'Areas of active blood-brain barrier breakdown with contrast enhancement. Primary target for surgical resection and key indicator of tumour aggressiveness.',
+        },
+        brain: {
+            title: 'Brain Parenchyma',
+            subtitle: 'Structural Shell',
+            color: 'rgba(160,180,200,0.55)',
+            note: 'Semi-transparent brain surface from the T1-weighted MRI. Provides anatomical context for spatial orientation of tumour sub-regions.',
+        },
+    };
+
+    const facts = [
+        "The adult human brain weighs about 3 pounds (1.4 kg).",
+        "The brain is composed of about 75% water.",
+        "Your brain generates enough electricity to power a small light bulb.",
+        "Volumetric analysis helps track tumor response to treatment.",
+        "3D segmentation provides a clear map for surgical planning."
+    ];
+
+    // --- Theme Logic ---
+    const themeSettings = {
+        light: {
+            modelViewerBg: '#E8EAED', 
+            toggleText: 'Dark Mode'
+        },
+        dark: {
+            modelViewerBg: '#1a1a1a', 
+            toggleText: 'Light Mode'
+        }
+    };
+
+    function applyTheme(themeName) {
+        document.documentElement.setAttribute('data-theme', themeName);
+        const settings = themeSettings[themeName];
+        
+        
+        
+        if(themeToggle) {
+            themeToggle.textContent = settings.toggleText;
+        }
+        localStorage.setItem('theme', themeName);
+    }
+
+    // --- Status & Fun Facts Logic ---
+    function showFunFacts() {
+        let factIndex = 0;
+        if(funFactP) {
+             funFactP.textContent = facts[factIndex];
+             statusDiv.style.display = 'block';
+     
+             funFactInterval = setInterval(() => {
+                 factIndex = (factIndex + 1) % facts.length;
+                 funFactP.textContent = facts[factIndex];
+             }, 5000);
+        }
+    }
+
+    function hideStatus() {
+        clearInterval(funFactInterval);
+        if(statusDiv) statusDiv.style.display = 'none';
+    }
+
+    /**
+     * ===================================================
+     * CORE FUNCTION: Process a File (Send to Backend)
+     * ===================================================
+     */
+    async function processFile(file) {
+        if (!file) {
+            errorDiv.textContent = 'No file provided for processing.';
+            errorDiv.style.display = 'block';
+            return;
+        }
+
+        // 1. Reset UI
+        uploadButton.disabled = true;
+        if(processSample1Btn) processSample1Btn.disabled = true;
+        if(viewSample1Btn) viewSample1Btn.disabled = true;
+        
+        uploadButton.textContent = 'Processing...';
+        errorDiv.style.display = 'none';
+        resultsDiv.style.display = 'none';
+        
+        showFunFacts();
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            // Call your local backend API
+            const response = await fetch('http://127.0.0.1:8000/segment-and-analyze/', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                try {
+                    const errorData = JSON.parse(errorText);
+                    throw new Error(errorData.detail || errorData.error || `HTTP error! Status: ${response.status}`);
+                } catch {
+                      throw new Error(`Server returned an error: ${response.status} - ${errorText}`);
+                }
+            }
+
+            const data = await response.json();
+
+            // 2. Display Volumes — read from clinical_report
+            const cr = data.clinical_report;
+            const vols = cr ? cr.volumes_mm3 : null;
+
+            if (vols) {
+                if (volTotalSpan) volTotalSpan.textContent = (vols.total_tumor || 0).toFixed(2);
+                if (volEdemaSpan) volEdemaSpan.textContent = (vols.edema || 0).toFixed(2);
+                if (volCoreSpan) volCoreSpan.textContent = (vols.necrotic_core || 0).toFixed(2);
+                if (volEnhancingSpan) volEnhancingSpan.textContent = (vols.enhancing_tumor || 0).toFixed(2);
+
+                // Store volume data for tooltip
+                const total = vols.total_tumor || 0;
+                volumeData = {
+                    total: total,
+                    edema: vols.edema || 0,
+                    necrotic_core: vols.necrotic_core || 0,
+                    enhancing_tumor: vols.enhancing_tumor || 0,
+                    brain: null,
+                    edema_pct: total > 0 ? ((vols.edema / total) * 100).toFixed(1) : '0',
+                    necrotic_core_pct: total > 0 ? ((vols.necrotic_core / total) * 100).toFixed(1) : '0',
+                    enhancing_tumor_pct: total > 0 ? ((vols.enhancing_tumor / total) * 100).toFixed(1) : '0',
+                };
+            }
+
+            // Store centroids for hotspot creation
+            meshCentroids = data.mesh_centroids || null;
+
+            // 3. Display 3D Model
+            const byteCharacters = atob(data.model_glb_base64);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray], { type: 'model/gltf-binary' });
+            const blobUrl = URL.createObjectURL(blob);
+            
+            modelViewer.src = blobUrl;
+            resultsDiv.style.display = 'block';
+
+            // Show surgical planning button if data available
+            if (data.surgical_planning && Object.keys(data.surgical_planning).length) {
+                surgicalData = data.surgical_planning;
+                document.getElementById('surgical-toggle').style.display = 'block';
+            }
+
+        } catch (err) {
+            console.error('Processing Error:', err);
+            errorDiv.textContent = err.message || 'An unknown error occurred during processing.';
+            errorDiv.style.display = 'block';
+        } finally {
+            // 4. Cleanup UI
+            uploadButton.disabled = false;
+            if(processSample1Btn) processSample1Btn.disabled = false;
+            if(viewSample1Btn) viewSample1Btn.disabled = false;
+            uploadButton.textContent = 'Analyze Scan';
+            hideStatus();
+        }
+    }
+    
+    // --- Event Listeners ---
+
+    // 1. Theme Toggle
+    if(themeToggle) {
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            applyTheme(newTheme);
+        });
+    }
+
+    // 2. Initialize Theme on Load
+    document.addEventListener('DOMContentLoaded', () => {
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        applyTheme(savedTheme);
+    });
+
+    // 3. Main File Upload Button (FIXED: Removed duplicate logic)
+    if(uploadButton) {
+        uploadButton.addEventListener('click', () => {
+            const file = fileInput.files[0];
+            if (!file) {
+                errorDiv.textContent = 'Please select a file first.';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            processFile(file);
+        });
+    }
+
+    // 4. "Process Sample" Button
+    if(processSample1Btn) {
+        processSample1Btn.addEventListener('click', async () => {
+            const fileUrl = processSample1Btn.dataset.url;
+            const fileName = "sample_scan.zip"; 
+
+            // UI Feedback
+            errorDiv.style.display = 'none';
+            processSample1Btn.textContent = "Loading...";
+            processSample1Btn.disabled = true;
+
+            try {
+                const response = await fetch(fileUrl);
+                if (!response.ok) throw new Error(`Could not load sample file. Status: ${response.status}`);
+                
+                const blob = await response.blob();
+                const sampleFile = new File([blob], fileName, { type: "application/zip" });
+                
+                processSample1Btn.textContent = "Process Sample Case";
+                processSample1Btn.disabled = false;
+                
+                await processFile(sampleFile);
+
+            } catch (err) {
+                console.error('Failed to fetch sample file:', err);
+                errorDiv.textContent = `Could not load the sample file from: ${fileUrl}. Check console.`;
+                errorDiv.style.display = 'block';
+                processSample1Btn.textContent = "Process Sample Case";
+                processSample1Btn.disabled = false;
+            }
+        });
+    }
+
+    // 5. "View Sample Model" Button
+    if(viewSample1Btn) {
+        viewSample1Btn.addEventListener('click', () => {
+            const modelUrl = viewSample1Btn.dataset.url;
+            
+            // Parse volumes from data attributes
+            const volTotal = parseFloat(viewSample1Btn.dataset.volTotal || 0);
+            const volEdema = parseFloat(viewSample1Btn.dataset.volEdema || 0);
+            const volCore = parseFloat(viewSample1Btn.dataset.volCore || 0);
+            const volEnhancing = parseFloat(viewSample1Btn.dataset.volEnhancing || 0);
+
+            console.log(`Instantly loading model: ${modelUrl}`);
+
+            errorDiv.style.display = 'none';
+            statusDiv.style.display = 'none';
+
+            // Update Volume Text
+            if (volTotalSpan) volTotalSpan.textContent = volTotal.toFixed(2);
+            if (volEdemaSpan) volEdemaSpan.textContent = volEdema.toFixed(2);
+            if (volCoreSpan) volCoreSpan.textContent = volCore.toFixed(2);
+            if (volEnhancingSpan) volEnhancingSpan.textContent = volEnhancing.toFixed(2);
+            
+            // Set Source
+            modelViewer.src = modelUrl;
+            
+            // Show Results
+            resultsDiv.style.display = 'block';
+            resultsDiv.scrollIntoView({ behavior: 'smooth' });
+        });
+    }
+
+    // ══════════════════════════════════════════════════════════
+    // HOTSPOT + TOOLTIP SYSTEM
+    // ══════════════════════════════════════════════════════════
+
+    // Create hotspot buttons when model-viewer finishes loading
+    modelViewer.addEventListener('load', () => {
+        console.log('[Tooltip] model-viewer loaded — creating hotspots');
+        createHotspots();
+    });
+
+    function clearHotspots() {
+        modelViewer.querySelectorAll('.hotspot-btn').forEach(el => el.remove());
+    }
+
+    function createHotspots() {
+        clearHotspots();
+        if (!meshCentroids) {
+            console.log('[Tooltip] No centroids available — skipping hotspot creation');
+            return;
+        }
+
+        for (const [name, pos] of Object.entries(meshCentroids)) {
+            const meta = MESH_META[name];
+            if (!meta) continue;
+
+            const btn = document.createElement('button');
+            btn.className = 'hotspot-btn';
+            btn.slot = `hotspot-${name}`;
+            btn.dataset.position = `${pos[0]} ${pos[1]} ${pos[2]}`;
+            btn.dataset.normal = '0 1 0';
+            btn.dataset.label = meta.title;
+            btn.style.setProperty('--hotspot-color', meta.color);
+            btn.title = meta.title;
+
+            btn.addEventListener('mouseenter', () => {
+                const rect = btn.getBoundingClientRect();
+                showTooltip(name, rect.left + rect.width / 2, rect.top);
+                applyEmphasis(name, meta.color);
+            });
+            btn.addEventListener('mouseleave', () => {
+                hideTooltip();
+                removeEmphasis();
+            });
+
+            modelViewer.appendChild(btn);
+            console.log(`[Tooltip]   + hotspot: ${name} @ (${pos[0].toFixed(1)}, ${pos[1].toFixed(1)}, ${pos[2].toFixed(1)})`);
+        }
+    }
+
+    // ── Tooltip show / hide / position ──
+    function showTooltip(meshName, cx, cy) {
+        if (currentHovered === meshName) {
+            positionTooltip(cx, cy);
+            return;
+        }
+        currentHovered = meshName;
+        const meta = MESH_META[meshName];
+        const tt = document.getElementById('mesh-tooltip');
+
+        document.getElementById('tt-accent').style.background = meta.color;
+        document.getElementById('tt-dot').style.background = meta.color;
+        document.getElementById('tt-title').textContent = meta.title;
+        document.getElementById('tt-subtitle').textContent = meta.subtitle;
+        document.getElementById('tt-note').textContent = meta.note;
+
+        if (volumeData && volumeData[meshName] != null) {
+            document.getElementById('tt-volume').textContent = Math.round(volumeData[meshName]).toLocaleString() + ' mm³';
+            const pct = volumeData[meshName + '_pct'];
+            document.getElementById('tt-pct').textContent = pct != null ? pct + '%' : '—';
+        } else {
+            document.getElementById('tt-volume').textContent = meshName === 'brain' ? 'N/A' : '—';
+            document.getElementById('tt-pct').textContent = meshName === 'brain' ? 'N/A' : '—';
+        }
+
+        positionTooltip(cx, cy);
+        tt.classList.add('visible');
+    }
+
+    function hideTooltip() {
+        if (!currentHovered) return;
+        currentHovered = null;
+        document.getElementById('mesh-tooltip').classList.remove('visible');
+    }
+
+    function positionTooltip(cx, cy) {
+        const tt = document.getElementById('mesh-tooltip');
+        const pad = 16;
+        let x = cx + pad;
+        let y = cy - 10;
+        const ttRect = tt.getBoundingClientRect();
+        if (x + ttRect.width > window.innerWidth - pad) x = cx - ttRect.width - pad;
+        if (y + ttRect.height > window.innerHeight - pad) y = cy - ttRect.height - pad;
+        if (y < pad) y = pad;
+        tt.style.left = x + 'px';
+        tt.style.top = y + 'px';
+    }
+
+    // ── Emphasis effect on hover ──
+    function applyEmphasis(regionName, color) {
+        modelViewer.classList.add('region-focus');
+        modelViewer.style.setProperty('--focus-color', color + '33');
+
+        modelViewer.querySelectorAll('.hotspot-btn').forEach(btn => {
+            const btnRegion = btn.slot.replace('hotspot-', '');
+            if (btnRegion === regionName) {
+                btn.classList.add('active-hotspot');
+            } else {
+                btn.classList.remove('active-hotspot');
+            }
+        });
+    }
+
+    function removeEmphasis() {
+        modelViewer.classList.remove('region-focus');
+        modelViewer.style.removeProperty('--focus-color');
+        modelViewer.querySelectorAll('.hotspot-btn').forEach(btn => {
+            btn.classList.remove('active-hotspot');
+        });
+    }
+
+    // ══════════════════════════════════════════════════════════
+    // SURGICAL PLANNING LOGIC
+    // ══════════════════════════════════════════════════════════
+
+    function toggleSurgicalPanel() {
+        const panel = document.getElementById('surgical-panel');
+        const toggleBtn = document.getElementById('surgical-toggle');
+        surgicalPanelOpen = !surgicalPanelOpen;
+        
+        if (surgicalPanelOpen) {
+            panel.classList.add('visible');
+            toggleBtn.classList.add('active');
+            populateSurgicalPanel();
+            createSurgicalHotspots();
+        } else {
+            panel.classList.remove('visible');
+            toggleBtn.classList.remove('active');
+            clearSurgicalHotspots();
+        }
+    }
+
+    function populateSurgicalPanel() {
+        if (!surgicalData) return;
+        
+        document.getElementById('sp-depth').innerHTML = `${surgicalData.cortical_depth_mm} <span class="sp-unit">mm</span>`;
+        
+        const midlineWarn = surgicalData.midline_warning;
+        const midlineCard = document.getElementById('sp-midline-card');
+        document.getElementById('sp-midline').innerHTML = `${surgicalData.midline_distance_mm} <span class="sp-unit">mm</span>`;
+        
+        if (midlineWarn) {
+            midlineCard.classList.add('warning');
+            midlineCard.classList.remove('safe');
+            document.getElementById('sp-midline-note').textContent = "⚠ High risk: Tumour is within 5mm of mid-sagittal plane";
+        } else {
+            midlineCard.classList.remove('warning');
+            midlineCard.classList.add('safe');
+            document.getElementById('sp-midline-note').textContent = "Safe distance from mid-sagittal plane";
+        }
+        
+        document.getElementById('sp-bx').textContent = surgicalData.bbox_dims_mm[0];
+        document.getElementById('sp-by').textContent = surgicalData.bbox_dims_mm[1];
+        document.getElementById('sp-bz').textContent = surgicalData.bbox_dims_mm[2];
+    }
+
+    function createSurgicalHotspots() {
+        clearSurgicalHotspots();
+        if (!surgicalData) return;
+
+        // 1. Brain Surface (Cortical depth start)
+        if (surgicalData.brain_surface_point) {
+            addSurgicalHotspot('surface', surgicalData.brain_surface_point, `Cortical Depth: ${surgicalData.cortical_depth_mm}mm`, '#00dcff');
+        }
+        
+        // 2. Tumour Centroid
+        if (surgicalData.tumor_centroid) {
+            addSurgicalHotspot('centroid', surgicalData.tumor_centroid, 'Tumour Centroid', '#00dcff');
+        }
+        
+        // 3. Midline point
+        if (surgicalData.midline_target_point) {
+            const color = surgicalData.midline_warning ? '#ef4444' : '#b4ff00';
+            addSurgicalHotspot('midline', surgicalData.midline_target_point, `Midline: ${surgicalData.midline_distance_mm}mm`, color);
+        }
+    }
+
+    function addSurgicalHotspot(name, pos, label, color) {
+        const btn = document.createElement('div');
+        btn.className = 'surg-hotspot visible';
+        btn.slot = `hotspot-surg-${name}`;
+        btn.dataset.position = `${pos[0]} ${pos[1]} ${pos[2]}`;
+        btn.dataset.normal = '0 1 0';
+        btn.dataset.label = label;
+        btn.style.setProperty('--hs-color', color);
+        
+        modelViewer.appendChild(btn);
+    }
+
+    function clearSurgicalHotspots() {
+        modelViewer.querySelectorAll('.surg-hotspot').forEach(el => el.remove());
+    }
+
+</script>
+</body>
+</html>

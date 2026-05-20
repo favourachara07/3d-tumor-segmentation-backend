@@ -151,15 +151,39 @@ body{font-family:var(--font-sans);color:var(--color-text-primary);background:var
 /* ── Error ── */
 .error-box{display:flex;align-items:flex-start;gap:10px;background:var(--color-background-danger);border:0.5px solid var(--color-border-danger);border-radius:var(--border-radius-lg);padding:14px 16px;font-size:12px;color:var(--color-text-danger);line-height:1.6}
 
-/* ── 3D Viewer ── */
+/* ── 3D Viewer (model-viewer) ── */
 .viewer-shell{display:flex;flex-direction:column;gap:10px;flex:1}
-#three-canvas-wrap{width:100%;aspect-ratio:16/9;background:#0d1117;border-radius:var(--border-radius-lg);border:0.5px solid var(--color-border-tertiary);overflow:hidden;position:relative}
-#three-canvas-wrap canvas{display:block;width:100%!important;height:100%!important}
+#viewer-wrap{width:100%;aspect-ratio:16/9;border-radius:var(--border-radius-lg);border:0.5px solid var(--color-border-tertiary);overflow:hidden;position:relative;background:#0d1117}
+#nv-viewer{width:100%;height:100%;display:block}
 .viewer-hint{font-size:11px;color:var(--color-text-tertiary);font-family:var(--font-mono);text-align:center}
 .viewer-legend{display:flex;gap:16px;flex-wrap:wrap;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:10px 16px;align-items:center}
 .legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--color-text-secondary)}
 .legend-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
-.viewer-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;height:100%;color:var(--color-text-tertiary);font-size:12px;font-family:var(--font-mono)}
+.viewer-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--color-text-tertiary);font-size:12px;font-family:var(--font-mono);z-index:2;background:#0d1117}
+
+/* ── Hotspot buttons ── */
+.hotspot-btn{display:block;width:18px;height:18px;border-radius:50%;border:2px solid var(--hotspot-color,#fff);background:rgba(0,0,0,0.45);backdrop-filter:blur(4px);cursor:pointer;position:relative;transition:transform 0.2s,box-shadow 0.2s;padding:0;box-shadow:0 0 8px rgba(0,0,0,0.3)}
+.hotspot-btn:hover{transform:scale(1.4);box-shadow:0 0 18px rgba(0,0,0,0.5)}
+.hotspot-btn::before{content:'';position:absolute;inset:-5px;border-radius:50%;border:1.5px solid var(--hotspot-color,#fff);opacity:0.45;animation:hotspot-ring 2s ease-in-out infinite}
+.hotspot-btn::after{content:attr(data-label);position:absolute;left:calc(100% + 8px);top:50%;transform:translateY(-50%);white-space:nowrap;font-size:10px;font-family:var(--font-mono);color:#fff;background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);padding:3px 8px;border-radius:4px;opacity:0;transition:opacity 0.15s;pointer-events:none}
+.hotspot-btn:hover::after{opacity:1}
+@keyframes hotspot-ring{0%,100%{opacity:0.45;transform:scale(1)}50%{opacity:0;transform:scale(1.7)}}
+
+/* ── 3D Tooltip ── */
+#mesh-tooltip{position:fixed;z-index:1000;pointer-events:none;opacity:0;transition:opacity 0.18s ease,transform 0.18s ease;transform:translateY(6px);max-width:320px;min-width:220px}
+#mesh-tooltip.visible{opacity:1;transform:translateY(0)}
+.tooltip-card{background:rgba(22,22,30,0.92);backdrop-filter:blur(16px) saturate(1.4);-webkit-backdrop-filter:blur(16px) saturate(1.4);border:0.5px solid rgba(255,255,255,0.12);border-radius:10px;padding:0;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.45),0 1px 4px rgba(0,0,0,0.2)}
+.tooltip-accent{height:3px;width:100%;border-radius:10px 10px 0 0}
+.tooltip-body{padding:12px 14px}
+.tooltip-title{font-size:13px;font-weight:600;color:#f0f0f0;margin-bottom:2px;display:flex;align-items:center;gap:7px}
+.tooltip-title .tt-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+.tooltip-subtitle{font-size:10px;color:rgba(255,255,255,0.45);font-family:var(--font-mono);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:10px}
+.tooltip-metrics{display:flex;flex-direction:column;gap:6px}
+.tooltip-metric{display:flex;justify-content:space-between;align-items:center}
+.tooltip-metric-label{font-size:11px;color:rgba(255,255,255,0.55)}
+.tooltip-metric-value{font-size:12px;font-weight:500;font-family:var(--font-mono);color:#e8e8e8}
+.tooltip-divider{height:0.5px;background:rgba(255,255,255,0.08);margin:8px 0}
+.tooltip-note{font-size:10.5px;color:rgba(255,255,255,0.5);line-height:1.55;font-style:italic}
 
 /* ── Utility ── */
 .hidden{display:none!important}
@@ -376,14 +400,24 @@ body{font-family:var(--font-sans);color:var(--color-text-primary);background:var
     <div class="page" id="page-viewer">
       <div class="viewer-shell">
 
-        <div id="three-canvas-wrap">
+        <div id="viewer-wrap">
+          <model-viewer
+            id="nv-viewer"
+            alt="3D Brain and Tumour Segmentation"
+            camera-controls
+            auto-rotate
+            environment-image="neutral"
+            shadow-intensity="0.6"
+            exposure="1.2"
+            interaction-prompt="none"
+          ></model-viewer>
           <div class="viewer-placeholder" id="viewer-placeholder">
             <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><path d="M20 4L36 12V28L20 36L4 28V12L20 4Z" stroke="currentColor" stroke-width="1.5"/><path d="M20 4V36M4 12L36 12M4 28L36 28" stroke="currentColor" stroke-width="1" stroke-dasharray="3 3"/></svg>
             <div>No study loaded — upload a DICOM study first</div>
           </div>
         </div>
 
-        <div class="viewer-hint">Drag to rotate · Scroll to zoom · Right-drag to pan</div>
+        <div class="viewer-hint">Drag to rotate · Scroll to zoom · Hover pulsing dots for clinical context</div>
 
         <div class="viewer-legend">
           <div style="font-size:11px;font-weight:500;color:var(--color-text-secondary);margin-right:4px">Legend</div>
@@ -397,15 +431,32 @@ body{font-family:var(--font-sans);color:var(--color-text-primary);background:var
     </div>
     <!-- /page-viewer -->
 
+    <!-- ─── Hover Tooltip (positioned via JS) ─── -->
+    <div id="mesh-tooltip">
+      <div class="tooltip-card">
+        <div class="tooltip-accent" id="tt-accent"></div>
+        <div class="tooltip-body">
+          <div class="tooltip-title"><div class="tt-dot" id="tt-dot"></div><span id="tt-title">—</span></div>
+          <div class="tooltip-subtitle" id="tt-subtitle">—</div>
+          <div class="tooltip-metrics">
+            <div class="tooltip-metric"><span class="tooltip-metric-label">Volume</span><span class="tooltip-metric-value" id="tt-volume">—</span></div>
+            <div class="tooltip-metric"><span class="tooltip-metric-label">% of total lesion</span><span class="tooltip-metric-value" id="tt-pct">—</span></div>
+          </div>
+          <div class="tooltip-divider"></div>
+          <div class="tooltip-note" id="tt-note">—</div>
+        </div>
+      </div>
+    </div>
+
   </div>
   <!-- /content -->
 </div>
 <!-- /main -->
 
-<!-- Three.js r128 + GLTFLoader -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<!-- Google model-viewer web component -->
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js" async></script>
 <script>
-// ─── CONFIG ────────────────────────────────────────────────────────────────
+// ─── CONFIG ─────────────────────────────────────────────────────────────────
 const API_BASE = 'http://localhost:8000';
 const ENDPOINT = `${API_BASE}/segment-and-analyze/`;
 
@@ -413,12 +464,40 @@ const ENDPOINT = `${API_BASE}/segment-and-analyze/`;
 let inferenceStart  = null;
 let currentFile     = null;
 let glbBase64Global = null;
-let threeRenderer   = null;
-let threeScene      = null;
-let threeCamera     = null;
-let threeAnimId     = null;
+let currentHovered  = null;
+let volumeData      = null; // stored from renderResults for tooltip display
+let meshCentroids   = null; // stored from API response for hotspot placement
+let currentBlobUrl  = null; // revoke previous blob URLs to prevent leaks
 
-// ─── PAGE SWITCHING ─────────────────────────────────────────────────────────
+// Clinical metadata for each named mesh region
+const MESH_META = {
+  edema: {
+    title: 'Peritumoral Edema',
+    subtitle: 'Surrounding Swelling',
+    color: '#ffd700',
+    note: 'Represents vasogenic edema surrounding the tumour mass. Reflects blood-brain barrier disruption and local tissue infiltration. Extent correlates with mass effect severity.',
+  },
+  necrotic_core: {
+    title: 'Necrotic Core',
+    subtitle: 'Non-Enhancing Dead Tissue',
+    color: '#a01414',
+    note: 'Central tumour necrosis indicating rapid, out-growing blood supply. Larger necrotic cores are associated with higher-grade gliomas and poorer prognosis.',
+  },
+  enhancing_tumor: {
+    title: 'Enhancing Tumour',
+    subtitle: 'Active Core',
+    color: '#ff3232',
+    note: 'Represents areas of active blood-brain barrier breakdown with contrast enhancement. The primary target for surgical resection and a key indicator of tumour aggressiveness.',
+  },
+  brain: {
+    title: 'Brain Parenchyma',
+    subtitle: 'Structural Shell',
+    color: 'rgba(160,180,200,0.55)',
+    note: 'Semi-transparent rendering of the brain surface derived from the T1-weighted MRI. Provides anatomical context for spatial orientation of the tumour sub-regions.',
+  },
+};
+
+// ─── PAGE SWITCHING ───────────────────────────────────────────────────────
 function switchPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -432,33 +511,37 @@ function switchPage(name) {
   const navEl = document.getElementById(navMap[name]);
   if (navEl) navEl.classList.add('active');
 
-  // Initialise Three.js lazily when viewer tab first opens
-  if (name === 'viewer') {
-    initThreeIfNeeded();
-    if (glbBase64Global) loadGlbIntoScene(glbBase64Global);
+  // Load model into model-viewer when switching to viewer tab
+  if (name === 'viewer' && glbBase64Global) {
+    loadModelInViewer(glbBase64Global);
   }
 }
 
 function resetToUpload() {
   currentFile     = null;
   glbBase64Global = null;
+  volumeData      = null;
+  meshCentroids   = null;
   document.getElementById('file-name').textContent = '';
   document.getElementById('file-input').value = '';
   setProgress(0, 'Ready');
-  // Clear 3D scene
-  if (threeScene) { while(threeScene.children.length) threeScene.remove(threeScene.children[0]); }
+  // Clear model-viewer
+  const viewer = document.getElementById('nv-viewer');
+  viewer.removeAttribute('src');
+  clearHotspots();
+  if (currentBlobUrl) { URL.revokeObjectURL(currentBlobUrl); currentBlobUrl = null; }
   document.getElementById('viewer-placeholder').style.display = 'flex';
   switchPage('upload');
 }
 
-// ─── PROGRESS ───────────────────────────────────────────────────────────────
+// ─── PROGRESS ─────────────────────────────────────────────────────────────
 function setProgress(pct, label) {
   document.getElementById('progress-fill').style.width = pct + '%';
   document.getElementById('proc-pct').textContent = pct + '%';
   document.getElementById('proc-step').textContent = label;
 }
 
-// ─── FILE INPUT ─────────────────────────────────────────────────────────────
+// ─── FILE INPUT ───────────────────────────────────────────────────────────
 document.getElementById('file-input').addEventListener('change', e => {
   const f = e.target.files[0];
   if (!f) return;
@@ -481,7 +564,7 @@ dropZone.addEventListener('drop', e => {
   submitFile(f);
 });
 
-// ─── SUBMIT ─────────────────────────────────────────────────────────────────
+// ─── SUBMIT ───────────────────────────────────────────────────────────────
 async function submitFile(file) {
   switchPage('processing');
   inferenceStart = performance.now();
@@ -515,6 +598,7 @@ async function submitFile(file) {
     setProgress(100, 'Analysis complete.');
     const data = await resp.json();
     glbBase64Global = data.model_glb_base64 || null;
+    meshCentroids   = data.mesh_centroids   || null;
 
     await new Promise(r => setTimeout(r, 400));
     renderResults(data, file.name);
@@ -576,7 +660,6 @@ function renderResults(data, filename) {
   document.getElementById('chip-inference').textContent  = inferenceTime + 's';
 
   // ── Segmentation breakdown ──
-  // Colours match BraTS convention used in backend: edema=gold, necrotic=dark red, enhancing=bright red
   const enh  = vols.enhancing_tumor;
   const necr = vols.necrotic_core;
   const edem = vols.edema;
@@ -591,7 +674,7 @@ function renderResults(data, filename) {
   document.getElementById('bar-core').style.width      = necrPct + '%';
   document.getElementById('bar-edema').style.width     = edemPct + '%';
 
-  // ── Warnings — merge QA warnings (from processing.py) + display ──
+  // ── Warnings ──
   const qaWarnings = (meta.warnings || []);
   const allWarnings = [...qaWarnings];
   const warnList = document.getElementById('warn-list');
@@ -623,153 +706,156 @@ function renderResults(data, filename) {
     document.getElementById('disclaimer-text').textContent = cr.disclaimer;
   }
 
+  // ── Store volume data for 3D tooltip consumption ──
+  volumeData = {
+    total: totalMm3,
+    edema: edem,
+    necrotic_core: necr,
+    enhancing_tumor: enh,
+    brain: null,
+    edema_pct: edemPct,
+    necrotic_core_pct: necrPct,
+    enhancing_tumor_pct: enhPct,
+  };
+
+  // ── Store centroids from API response ──
+  meshCentroids = data.mesh_centroids || null;
+
   switchPage('cdss');
 }
 
-// ─── ERROR ───────────────────────────────────────────────────────────────────
+// ─── ERROR ─────────────────────────────────────────────────────────────────
 function showError(msg) {
   document.getElementById('error-msg').textContent = msg;
   switchPage('error');
 }
 
-// ─── THREE.JS SETUP ──────────────────────────────────────────────────────────
-function initThreeIfNeeded() {
-  if (threeRenderer) return;
+// ─── MODEL-VIEWER LOADING ─────────────────────────────────────────────────────
+function loadModelInViewer(base64str) {
+  if (!base64str) return;
 
-  const wrap = document.getElementById('three-canvas-wrap');
-  const W = wrap.clientWidth  || 800;
-  const H = wrap.clientHeight || 450;
-
-  threeRenderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
-  threeRenderer.setSize(W, H);
-  threeRenderer.setPixelRatio(window.devicePixelRatio);
-  threeRenderer.setClearColor(0x0d1117, 1);
-  wrap.appendChild(threeRenderer.domElement);
-
-  threeScene  = new THREE.Scene();
-  threeCamera = new THREE.PerspectiveCamera(50, W / H, 0.1, 2000);
-  threeCamera.position.set(0, 0, 300);
-
-  // Lights
-  const ambient = new THREE.AmbientLight(0xffffff, 0.6);
-  const dirA = new THREE.DirectionalLight(0xffffff, 0.8);
-  dirA.position.set(1, 2, 3);
-  const dirB = new THREE.DirectionalLight(0x8899cc, 0.4);
-  dirB.position.set(-2, -1, -1);
-  threeScene.add(ambient, dirA, dirB);
-
-  // Orbit controls (manual — no OrbitControls CDN needed)
-  let isDragging = false, isRightDrag = false;
-  let prevX = 0, prevY = 0;
-  let rotX = 0, rotY = 0;
-  let panX = 0, panY = 0;
-  let zoom = 300;
-  const pivot = new THREE.Group();
-  threeScene.add(pivot);
-
-  threeRenderer.domElement.addEventListener('mousedown', e => {
-    isDragging  = true;
-    isRightDrag = e.button === 2;
-    prevX = e.clientX; prevY = e.clientY;
-  });
-  threeRenderer.domElement.addEventListener('contextmenu', e => e.preventDefault());
-  window.addEventListener('mouseup', () => { isDragging = false; });
-  window.addEventListener('mousemove', e => {
-    if (!isDragging) return;
-    const dx = e.clientX - prevX, dy = e.clientY - prevY;
-    prevX = e.clientX; prevY = e.clientY;
-    if (isRightDrag) {
-      panX += dx * 0.4; panY -= dy * 0.4;
-    } else {
-      rotY += dx * 0.4; rotX += dy * 0.4;
-    }
-    pivot.rotation.x = THREE.MathUtils.degToRad(rotX);
-    pivot.rotation.y = THREE.MathUtils.degToRad(rotY);
-    threeCamera.position.set(panX, panY, zoom);
-  });
-  threeRenderer.domElement.addEventListener('wheel', e => {
-    zoom = Math.max(50, Math.min(800, zoom + e.deltaY * 0.5));
-    threeCamera.position.set(panX, panY, zoom);
-  });
-
-  // Animate
-  function animate() {
-    threeAnimId = requestAnimationFrame(animate);
-    threeRenderer.render(threeScene, threeCamera);
-  }
-  animate();
-
-  // Resize
-  window.addEventListener('resize', () => {
-    const nW = wrap.clientWidth, nH = wrap.clientHeight;
-    threeRenderer.setSize(nW, nH);
-    threeCamera.aspect = nW / nH;
-    threeCamera.updateProjectionMatrix();
-  });
-}
-
-// ─── LOAD GLB INTO SCENE ────────────────────────────────────────────────────
-function loadGlbIntoScene(base64str) {
-  if (!threeScene || !base64str) return;
-
-  // Hide placeholder
+  const viewer = document.getElementById('nv-viewer');
   document.getElementById('viewer-placeholder').style.display = 'none';
 
-  // Clear previous meshes (keep lights)
-  const toRemove = [];
-  threeScene.traverse(obj => { if (obj.isMesh || obj.isGroup) toRemove.push(obj); });
-  toRemove.forEach(obj => threeScene.remove(obj));
+  // Revoke previous blob URL to prevent memory leaks
+  if (currentBlobUrl) { URL.revokeObjectURL(currentBlobUrl); }
 
-  // Decode base64 → ArrayBuffer
+  // Convert base64 → blob URL
   const binary = atob(base64str);
   const bytes  = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-  const buffer = bytes.buffer;
+  const blob = new Blob([bytes], { type: 'model/gltf-binary' });
+  currentBlobUrl = URL.createObjectURL(blob);
 
-  // Minimal GLB parser using Three.js built-in loader
-  // Dynamically inject GLTFLoader since we only have r128 core
-  injectGltfLoader().then(loader => {
-    loader.parse(buffer, '', gltf => {
-      const model = gltf.scene;
-
-      // Enable transparency on all materials (the backend sets RGBA per face)
-      model.traverse(child => {
-        if (child.isMesh && child.material) {
-          child.material.transparent = true;
-          child.material.depthWrite  = false;
-          child.material.side        = THREE.DoubleSide;
-        }
-      });
-
-      // Centre the model
-      const box = new THREE.Box3().setFromObject(model);
-      const centre = box.getCenter(new THREE.Vector3());
-      model.position.sub(centre);
-
-      // Scale to fit nicely at zoom=300
-      const size = box.getSize(new THREE.Vector3());
-      const maxDim = Math.max(size.x, size.y, size.z);
-      const scale  = 180 / maxDim;
-      model.scale.setScalar(scale);
-
-      threeScene.add(model);
-    }, err => console.error('[NeuroVista] GLB parse error:', err));
-  });
+  viewer.src = currentBlobUrl;
 }
 
-// Inject GLTFLoader script once
-let gltfLoaderPromise = null;
-function injectGltfLoader() {
-  if (gltfLoaderPromise) return gltfLoaderPromise;
-  gltfLoaderPromise = new Promise((resolve, reject) => {
-    // THREE r128 GLTFLoader from CDN
-    const s = document.createElement('script');
-    s.src = 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js';
-    s.onload = () => resolve(new THREE.GLTFLoader());
-    s.onerror = reject;
-    document.head.appendChild(s);
-  });
-  return gltfLoaderPromise;
+// model-viewer ‘load’ event → create hotspot buttons at mesh centroids
+document.addEventListener('DOMContentLoaded', () => {
+  const viewer = document.getElementById('nv-viewer');
+  if (viewer) {
+    viewer.addEventListener('load', () => {
+      console.log('[NeuroVista] model-viewer loaded — creating hotspots');
+      createHotspots();
+    });
+  }
+});
+
+// ─── HOTSPOT MANAGEMENT ──────────────────────────────────────────────────────
+function clearHotspots() {
+  const viewer = document.getElementById('nv-viewer');
+  viewer.querySelectorAll('.hotspot-btn').forEach(el => el.remove());
+}
+
+function createHotspots() {
+  const viewer = document.getElementById('nv-viewer');
+  clearHotspots();
+
+  if (!meshCentroids) {
+    console.log('[NeuroVista] No centroids available — skipping hotspot creation');
+    return;
+  }
+
+  for (const [name, pos] of Object.entries(meshCentroids)) {
+    const meta = MESH_META[name];
+    if (!meta) continue;
+
+    const btn = document.createElement('button');
+    btn.className = 'hotspot-btn';
+    btn.slot = `hotspot-${name}`;
+    btn.dataset.position = `${pos[0]} ${pos[1]} ${pos[2]}`;
+    btn.dataset.normal = '0 1 0';
+    btn.dataset.label = meta.title;
+    btn.style.setProperty('--hotspot-color', meta.color);
+    btn.title = meta.title;
+
+    // Hover events for tooltip
+    btn.addEventListener('mouseenter', (e) => {
+      const rect = btn.getBoundingClientRect();
+      showTooltip(name, rect.left + rect.width / 2, rect.top);
+    });
+    btn.addEventListener('mouseleave', () => hideTooltip());
+
+    viewer.appendChild(btn);
+    console.log(`[NeuroVista]   + hotspot: ${name} @ (${pos[0].toFixed(1)}, ${pos[1].toFixed(1)}, ${pos[2].toFixed(1)})`);
+  }
+}
+
+// ─── TOOLTIP HELPERS ─────────────────────────────────────────────────────────
+function showTooltip(meshName, clientX, clientY) {
+  if (currentHovered === meshName) {
+    positionTooltip(clientX, clientY);
+    return;
+  }
+  currentHovered = meshName;
+  const meta = MESH_META[meshName];
+  const tt   = document.getElementById('mesh-tooltip');
+
+  document.getElementById('tt-accent').style.background = meta.color;
+  document.getElementById('tt-dot').style.background    = meta.color;
+  document.getElementById('tt-title').textContent       = meta.title;
+  document.getElementById('tt-subtitle').textContent    = meta.subtitle;
+  document.getElementById('tt-note').textContent        = meta.note;
+
+  // Populate volume data if available
+  if (volumeData && volumeData[meshName] != null) {
+    const vol = volumeData[meshName];
+    document.getElementById('tt-volume').textContent = Math.round(vol).toLocaleString() + ' mm³';
+    const pct = volumeData[meshName + '_pct'];
+    document.getElementById('tt-pct').textContent    = pct != null ? pct + '%' : '—';
+  } else {
+    document.getElementById('tt-volume').textContent = meshName === 'brain' ? 'N/A' : '—';
+    document.getElementById('tt-pct').textContent    = meshName === 'brain' ? 'N/A' : '—';
+  }
+
+  positionTooltip(clientX, clientY);
+  tt.classList.add('visible');
+}
+
+function hideTooltip() {
+  if (!currentHovered) return;
+  currentHovered = null;
+  document.getElementById('mesh-tooltip').classList.remove('visible');
+}
+
+function positionTooltip(cx, cy) {
+  const tt = document.getElementById('mesh-tooltip');
+  const pad = 16;
+  let x = cx + pad;
+  let y = cy - 10;
+
+  // Prevent overflow off right/bottom edge
+  const ttRect = tt.getBoundingClientRect();
+  if (x + ttRect.width > window.innerWidth - pad) {
+    x = cx - ttRect.width - pad;
+  }
+  if (y + ttRect.height > window.innerHeight - pad) {
+    y = cy - ttRect.height - pad;
+  }
+  if (y < pad) y = pad;
+
+  tt.style.left = x + 'px';
+  tt.style.top  = y + 'px';
 }
 
 // ─── UTIL ────────────────────────────────────────────────────────────────────
