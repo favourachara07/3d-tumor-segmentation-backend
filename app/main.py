@@ -19,7 +19,7 @@ import tempfile
 import zipfile
 import base64
 from contextlib import asynccontextmanager
-from .clinical_decision import generate_clinical_report
+from clinical_decision import generate_clinical_report
 
 import torch
 import numpy as np
@@ -45,7 +45,7 @@ from monai.transforms import (
     ToTensord,
 )
 
-from .processing import get_model, calculate_clinical_volumes
+from processing import get_model, calculate_clinical_volumes
 
 
 # ---------------------------------------------------------------------------
