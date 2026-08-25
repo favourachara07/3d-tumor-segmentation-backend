@@ -300,6 +300,406 @@
             font-weight: 400;
             margin-left: 4px;
         }
+
+        /* Predictive analysis */
+        .predictive-card {
+            margin-bottom: 24px;
+        }
+        .predictive-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .predictive-title {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+        }
+        .triage-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 90px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            border: 1px solid var(--border-color);
+        }
+        .triage-URGENT {
+            background: rgba(239, 68, 68, 0.18);
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.4);
+        }
+        .triage-EXPEDITED {
+            background: rgba(245, 158, 11, 0.18);
+            color: #f59e0b;
+            border-color: rgba(245, 158, 11, 0.4);
+        }
+        .triage-ROUTINE {
+            background: rgba(34, 197, 94, 0.18);
+            color: #22c55e;
+            border-color: rgba(34, 197, 94, 0.4);
+        }
+        .predictive-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .predictive-block {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 14px;
+            background: var(--bg-color);
+        }
+        .predictive-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .predictive-value {
+            font-size: 30px;
+            font-weight: 700;
+            line-height: 1.1;
+            font-family: monospace;
+        }
+        .predictive-subtext {
+            margin-top: 8px;
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+        .mini-bar {
+            height: 8px;
+            border-radius: 999px;
+            background: rgba(148, 163, 184, 0.25);
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        .mini-bar-fill {
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 999px;
+        }
+        .grade-row {
+            display: grid;
+            grid-template-columns: 68px 1fr 42px;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+        .grade-row:last-child {
+            margin-bottom: 0;
+        }
+        .grade-row span {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+        .grade-track {
+            height: 8px;
+            border-radius: 999px;
+            background: rgba(148, 163, 184, 0.25);
+            overflow: hidden;
+        }
+        .grade-fill {
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 999px;
+        }
+        .grade-pct {
+            text-align: right;
+            font-size: 12px;
+            color: var(--text-color);
+            font-family: monospace;
+            font-weight: 700;
+        }
+        .predictive-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .predictive-note-box {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 14px;
+            background: var(--bg-color);
+        }
+        .warning-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .warning-item {
+            font-size: 12px;
+            color: var(--error-text);
+            background: var(--error-bg);
+            border: 1px solid var(--error-border);
+            border-radius: 8px;
+            padding: 8px 10px;
+            line-height: 1.4;
+        }
+        .disclaimer {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin: 0;
+            border-top: 1px solid var(--border-color);
+            padding-top: 14px;
+        }
+        .section-separator {
+            margin: 20px 0 10px;
+            border-top: 1px dashed var(--border-color);
+            text-align: center;
+            position: relative;
+        }
+        .section-separator span {
+            display: inline-block;
+            margin-top: -11px;
+            background: var(--bg-color);
+            color: var(--text-muted);
+            font-size: 11px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 0 10px;
+            font-weight: 600;
+        }
+
+        .predictive-intel-toggle {
+            display: none;
+            width: 100%;
+            margin: 12px 0;
+            padding: 14px 20px;
+            background: linear-gradient(135deg, #059669, #16a34a);
+            color: #ecfdf5;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 0.01em;
+            cursor: pointer;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            box-shadow: 0 6px 18px rgba(5, 150, 105, 0.25);
+        }
+        .predictive-intel-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 26px rgba(5, 150, 105, 0.35);
+        }
+        .predictive-intel-toggle.active {
+            background: linear-gradient(135deg, #047857, #15803d);
+        }
+
+        .predictive-intel-panel {
+            display: none;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            background: var(--box-bg-color);
+            padding: 24px;
+            box-shadow: var(--card-shadow);
+            animation: panelSlide 0.35s ease;
+            margin-top: 6px;
+        }
+        .predictive-intel-panel.visible {
+            display: block;
+        }
+        .pi-title {
+            margin: 0 0 10px 0;
+            font-size: 30px;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+        .pi-callout {
+            margin: 0 0 18px 0;
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.35);
+            border-left: 3px solid #10b981;
+            border-radius: 10px;
+            padding: 12px 14px;
+            color: var(--text-muted);
+            font-size: 13px;
+            line-height: 1.55;
+        }
+        .pi-callout strong {
+            color: #10b981;
+        }
+        .pi-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .pi-metric {
+            border: 1px solid var(--border-color);
+            border-top: 3px solid var(--metric-accent, #10b981);
+            border-radius: 12px;
+            padding: 14px;
+            background: var(--bg-color);
+        }
+        .pi-metric-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .pi-metric-value {
+            font-size: 34px;
+            font-weight: 700;
+            font-family: monospace;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+        .pi-metric-note {
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.45;
+        }
+        .pi-chart-card {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 14px;
+            background: var(--bg-color);
+            margin-bottom: 14px;
+        }
+        .pi-chart-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .pi-chart-head h4 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 600;
+        }
+        .pi-chart-sub {
+            margin: 2px 0 0 0;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        .pi-model-pill {
+            font-size: 10px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.45);
+            background: rgba(16, 185, 129, 0.12);
+            border-radius: 999px;
+            padding: 4px 8px;
+        }
+        .pi-chart-svg {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.06), rgba(15, 23, 42, 0.02));
+        }
+        .pi-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-top: 10px;
+        }
+        .pi-legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        .pi-legend-line {
+            width: 16px;
+            height: 2px;
+            border-radius: 2px;
+            background: currentColor;
+        }
+        .pi-table-wrap {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow-x: auto;
+            background: var(--bg-color);
+        }
+        .pi-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .pi-table th,
+        .pi-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border-color);
+            text-align: left;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+        .pi-table th {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .pi-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        .pi-table strong {
+            font-family: monospace;
+            font-size: 13px;
+        }
+        .pi-flag {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 999px;
+            padding: 2px 8px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .pi-flag.safe {
+            color: #22c55e;
+            border: 1px solid rgba(34, 197, 94, 0.45);
+            background: rgba(34, 197, 94, 0.12);
+        }
+        .pi-flag.warn {
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.45);
+            background: rgba(245, 158, 11, 0.12);
+        }
+        .pi-flag.danger {
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.45);
+            background: rgba(239, 68, 68, 0.12);
+        }
+        .projection-disclaimer {
+            margin-top: 12px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 12px;
+            font-size: 11px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        @media (max-width: 760px) {
+            .predictive-info-grid {
+                grid-template-columns: 1fr;
+            }
+            .pi-title {
+                font-size: 24px;
+            }
+        }
         
         model-viewer {
             width: 100%;
@@ -590,6 +990,67 @@
                 <div><span id="vol-core"></span><span class="unit">mm³</span></div>
             </div>
         </div>
+
+        <div class="card predictive-card" id="predictive-card" style="display: none;">
+            <div class="predictive-header">
+                <h3 class="predictive-title">Clinical Decision Support (Current MRI)</h3>
+                <div class="triage-pill triage-ROUTINE" id="res-triage">--</div>
+            </div>
+
+            <div class="predictive-grid">
+                <div class="predictive-block">
+                    <div class="predictive-label">Malignancy Likelihood</div>
+                    <div class="predictive-value" id="res-malignancy">--</div>
+                    <div class="mini-bar"><div class="mini-bar-fill" id="bar-malignancy" style="background:#f59e0b;"></div></div>
+                    <div class="predictive-subtext" id="res-grade-hint">--</div>
+                </div>
+
+                <div class="predictive-block">
+                    <div class="predictive-label">WHO Grade Probabilities</div>
+                    <div class="grade-row">
+                        <span>I-II</span>
+                        <div class="grade-track"><div class="grade-fill" id="bar-who12" style="background:#22c55e;"></div></div>
+                        <div class="grade-pct" id="pct-who12">--%</div>
+                    </div>
+                    <div class="grade-row">
+                        <span>III</span>
+                        <div class="grade-track"><div class="grade-fill" id="bar-who3" style="background:#f59e0b;"></div></div>
+                        <div class="grade-pct" id="pct-who3">--%</div>
+                    </div>
+                    <div class="grade-row">
+                        <span>IV</span>
+                        <div class="grade-track"><div class="grade-fill" id="bar-who4" style="background:#ef4444;"></div></div>
+                        <div class="grade-pct" id="pct-who4">--%</div>
+                    </div>
+                </div>
+
+                <div class="predictive-block">
+                    <div class="predictive-label">Derived Metrics</div>
+                    <div class="predictive-subtext"><strong>Total Core:</strong> <span id="chip-total-core">--</span></div>
+                    <div class="predictive-subtext"><strong>Enhancing Fraction:</strong> <span id="chip-enh-frac">--</span></div>
+                </div>
+            </div>
+
+            <div class="predictive-info-grid">
+                <div class="predictive-note-box">
+                    <div class="predictive-label">Estimated Outcome Range</div>
+                    <div class="predictive-subtext" id="res-outcome">--</div>
+                </div>
+                <div class="predictive-note-box">
+                    <div class="predictive-label">Surgical Note</div>
+                    <div class="predictive-subtext" id="res-surgical">--</div>
+                </div>
+            </div>
+
+            <div class="predictive-note-box" style="margin-bottom: 16px;">
+                <div class="predictive-label">Clinical Warnings</div>
+                <div class="warning-list" id="warn-list">
+                    <div class="predictive-subtext">No clinical warnings generated.</div>
+                </div>
+            </div>
+
+            <p class="disclaimer" id="disclaimer-text">Current-scan inference from segmentation features only. Supports triage and discussion, not standalone diagnosis. Requires radiologist and neurosurgeon validation.</p>
+        </div>
         
         <model-viewer
             id="viewer"
@@ -636,6 +1097,81 @@
                 </div>
             </div>
         </div>
+
+        <div class="section-separator">
+            <span>Projection Module (Separate From Current-Scan Inference)</span>
+        </div>
+
+        <button class="predictive-intel-toggle" id="predictive-intel-toggle" onclick="togglePredictivePanel()">
+            Open Tumor Growth Projection
+        </button>
+
+        <div class="predictive-intel-panel" id="predictive-intel-panel">
+            <h3 class="pi-title">Tumor Growth Projection (Gompertz Estimate)</h3>
+            <p class="pi-callout">
+                <strong>Population-calibrated estimate from one MRI timepoint.</strong>
+                Growth trajectory is modeled using a Gompertz-style curve calibrated from the current lesion burden and aggressiveness markers.
+                Longitudinal scans are required for patient-specific calibration.
+            </p>
+
+            <div class="pi-metrics">
+                <div class="pi-metric" style="--metric-accent:#10b981;">
+                    <div class="pi-metric-label">Estimated Doubling Time</div>
+                    <div class="pi-metric-value" id="pi-doubling">--</div>
+                    <div class="pi-metric-note">Time for total tumour volume to double at current projected growth velocity.</div>
+                </div>
+                <div class="pi-metric" style="--metric-accent:#ef4444;">
+                    <div class="pi-metric-label">Aggressiveness Category</div>
+                    <div class="pi-metric-value" id="pi-category" style="font-size:28px;">--</div>
+                    <div class="pi-metric-note">Derived from enhancement burden, grade distribution, and malignancy likelihood.</div>
+                </div>
+                <div class="pi-metric" style="--metric-accent:#6366f1;">
+                    <div class="pi-metric-label">6-Month Projection</div>
+                    <div class="pi-metric-value" id="pi-sixmo" style="font-size:30px;">--</div>
+                    <div class="pi-metric-note">Estimated total lesion volume at 6 months if untreated.</div>
+                </div>
+                <div class="pi-metric" style="--metric-accent:#ec4899;">
+                    <div class="pi-metric-label">Growth Rate (r)</div>
+                    <div class="pi-metric-value" id="pi-rate" style="font-size:32px;">--</div>
+                    <div class="pi-metric-note">Gompertz growth constant, calibrated to current risk profile.</div>
+                </div>
+            </div>
+
+            <div class="pi-chart-card">
+                <div class="pi-chart-head">
+                    <div>
+                        <h4>Projected Growth Trajectory (12 months, untreated)</h4>
+                        <p class="pi-chart-sub">Shaded region = uncertainty band (plus/minus 15% growth-rate variance)</p>
+                    </div>
+                    <div class="pi-model-pill">Gompertz Model</div>
+                </div>
+                <svg class="pi-chart-svg" id="predictive-chart" viewBox="0 0 840 300" aria-label="Predicted tumour growth chart"></svg>
+                <div class="pi-legend">
+                    <div class="pi-legend-item" style="color:#10b981;"><span class="pi-legend-line"></span>Central estimate</div>
+                    <div class="pi-legend-item" style="color:#14b8a6;"><span class="pi-legend-line"></span>Uncertainty band</div>
+                    <div class="pi-legend-item" style="color:#ef4444;"><span class="pi-legend-line"></span>Surgical threshold (150% baseline)</div>
+                </div>
+            </div>
+
+            <div class="pi-table-wrap">
+                <table class="pi-table">
+                    <thead>
+                        <tr>
+                            <th>Timepoint</th>
+                            <th>Projected Volume</th>
+                            <th>Vs. Baseline</th>
+                            <th>Clinical Flag</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pi-table-body"></tbody>
+                </table>
+            </div>
+
+            <p class="projection-disclaimer">
+                Projection is a hypothetical untreated-scenario estimate, not a patient-specific longitudinal forecast.
+                Use with serial imaging, molecular markers, and multidisciplinary clinical review before management decisions.
+            </p>
+        </div>
     </div>
 
     <!-- Hover Tooltip (positioned via JS) -->
@@ -675,6 +1211,9 @@
     const themeToggle = document.getElementById('theme-toggle');
     const processSample1Btn = document.getElementById('process-sample-1-btn');
     const viewSample1Btn = document.getElementById('view-sample-1-btn');
+    const predictiveCard = document.getElementById('predictive-card');
+    const predictiveIntelToggle = document.getElementById('predictive-intel-toggle');
+    const predictiveIntelPanel = document.getElementById('predictive-intel-panel');
 
     let funFactInterval;
     let currentHovered = null;
@@ -682,6 +1221,7 @@
     let meshCentroids = null;
     let surgicalData = null;
     let surgicalPanelOpen = false;
+    let predictivePanelOpen = false;
 
     // ── Clinical metadata for each mesh region ──
     const MESH_META = {
@@ -762,6 +1302,245 @@
         if(statusDiv) statusDiv.style.display = 'none';
     }
 
+    function togglePredictivePanel() {
+        predictivePanelOpen = !predictivePanelOpen;
+        if (predictivePanelOpen) {
+            predictiveIntelPanel.classList.add('visible');
+            predictiveIntelToggle.classList.add('active');
+        } else {
+            predictiveIntelPanel.classList.remove('visible');
+            predictiveIntelToggle.classList.remove('active');
+        }
+    }
+
+    function gompertzVolume(v0, k, r, tMonths) {
+        const safeBase = Math.max(v0, 1.0);
+        const safeK = Math.max(k, safeBase + 1.0);
+        return safeK * Math.exp(Math.log(safeBase / safeK) * Math.exp(-r * tMonths));
+    }
+
+    function formatMm3(value) {
+        return `${Math.round(value).toLocaleString()} mm³`;
+    }
+
+    function formatCompactMm3(value) {
+        const abs = Math.abs(value);
+        if (abs >= 1_000_000) return `${(value / 1_000_000).toFixed(2)}M mm³`;
+        if (abs >= 1_000) return `${Math.round(value).toLocaleString()} mm³`;
+        return `${value.toFixed(0)} mm³`;
+    }
+
+    function buildPredictiveModel(cr) {
+        const vols = cr?.volumes_mm3 || {};
+        const dm = cr?.derived_metrics || {};
+        const gp = cr?.grade_probabilities || { WHO_I_II: 0, WHO_III: 0, WHO_IV: 0 };
+
+        const baseline = Math.max(Number(vols.total_tumor || 0), 50);
+        const mal = Math.max(0, Math.min(100, Number(cr?.malignancy_likelihood_pct || 0)));
+        const enhFrac = Math.max(0, Math.min(100, Number(dm.enhancing_fraction || 0)));
+        const who4 = Math.max(0, Math.min(100, Number(gp.WHO_IV || 0)));
+
+        const rBase = 0.18 + (mal / 100) * 0.34 + (enhFrac / 100) * 0.16 + (who4 / 100) * 0.17;
+        const growthRate = Math.max(0.12, Math.min(0.85, Number(rBase.toFixed(2))));
+
+        let category = 'Low-Grade (Indolent)';
+        if (growthRate > 0.45) category = 'High-Grade (GBM-like)';
+        else if (growthRate > 0.30) category = 'Intermediate Risk';
+
+        const carryingCapacity = Math.max(baseline * (4.6 + growthRate * 2.8), 200_000);
+        const threshold = baseline * 1.5;
+        const doublingDays = Math.max(7, Math.round((Math.log(2) / growthRate) * 30.4));
+
+        const checkpoints = [0, 3, 6, 9, 12].map((month) => {
+            const v = gompertzVolume(baseline, carryingCapacity, growthRate, month);
+            return { month, volume: v };
+        });
+
+        return {
+            baseline,
+            growthRate,
+            category,
+            carryingCapacity,
+            threshold,
+            doublingDays,
+            checkpoints,
+            sixMonth: checkpoints.find((p) => p.month === 6)?.volume || baseline,
+        };
+    }
+
+    function renderPredictiveChart(model) {
+        const svg = document.getElementById('predictive-chart');
+        if (!svg) return;
+
+        const width = 840;
+        const height = 300;
+        const margin = { top: 22, right: 24, bottom: 38, left: 70 };
+
+        const months = [];
+        for (let t = 0; t <= 12; t += 0.25) months.push(Number(t.toFixed(2)));
+
+        const central = months.map((t) => gompertzVolume(model.baseline, model.carryingCapacity, model.growthRate, t));
+        const upper = months.map((t) => gompertzVolume(model.baseline, model.carryingCapacity, model.growthRate * 1.15, t));
+        const lower = months.map((t) => gompertzVolume(model.baseline, model.carryingCapacity, model.growthRate * 0.85, t));
+
+        const yMax = Math.max(...upper, model.threshold) * 1.08;
+        const xScale = (t) => margin.left + (t / 12) * (width - margin.left - margin.right);
+        const yScale = (v) => height - margin.bottom - (v / yMax) * (height - margin.top - margin.bottom);
+
+        const linePath = months
+            .map((t, i) => `${i === 0 ? 'M' : 'L'} ${xScale(t).toFixed(2)} ${yScale(central[i]).toFixed(2)}`)
+            .join(' ');
+
+        const areaUpper = months
+            .map((t, i) => `${i === 0 ? 'M' : 'L'} ${xScale(t).toFixed(2)} ${yScale(upper[i]).toFixed(2)}`)
+            .join(' ');
+        const areaLower = [...months]
+            .reverse()
+            .map((t, ri) => {
+                const i = months.length - 1 - ri;
+                return `L ${xScale(t).toFixed(2)} ${yScale(lower[i]).toFixed(2)}`;
+            })
+            .join(' ');
+        const areaPath = `${areaUpper} ${areaLower} Z`;
+
+        const yTicks = [0, 0.25, 0.5, 0.75, 1].map((f) => yMax * f);
+        const xTicks = [0, 3, 6, 9, 12];
+
+        const yTickLabel = (v) => {
+            if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(1)}M`;
+            if (v >= 1_000) return `${Math.round(v / 1000)}K`;
+            return `${Math.round(v)}`;
+        };
+
+        const gridX = xTicks.map((t) => `
+            <line x1="${xScale(t)}" y1="${margin.top}" x2="${xScale(t)}" y2="${height - margin.bottom}" stroke="rgba(148,163,184,0.18)" stroke-width="1" />
+            <text x="${xScale(t)}" y="${height - 12}" fill="var(--text-muted)" font-size="11" text-anchor="middle">${t}mo</text>
+        `).join('');
+
+        const gridY = yTicks.map((v) => `
+            <line x1="${margin.left}" y1="${yScale(v)}" x2="${width - margin.right}" y2="${yScale(v)}" stroke="rgba(148,163,184,0.18)" stroke-width="1" />
+            <text x="${margin.left - 8}" y="${yScale(v) + 4}" fill="var(--text-muted)" font-size="11" text-anchor="end">${yTickLabel(v)}</text>
+        `).join('');
+
+        const thresholdY = yScale(model.threshold);
+
+        svg.innerHTML = `
+            <rect x="0" y="0" width="${width}" height="${height}" fill="transparent" />
+            ${gridY}
+            ${gridX}
+            <path d="${areaPath}" fill="rgba(20,184,166,0.16)" />
+            <path d="${linePath}" fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round" />
+            <line x1="${margin.left}" y1="${thresholdY}" x2="${width - margin.right}" y2="${thresholdY}" stroke="#ef4444" stroke-width="2" stroke-dasharray="6 4" />
+            <text x="${margin.left + 6}" y="${thresholdY - 6}" fill="#ef4444" font-size="11">Surgical threshold</text>
+            <circle cx="${xScale(12)}" cy="${yScale(central[central.length - 1])}" r="4" fill="#10b981" />
+            <text x="18" y="${height / 2}" fill="var(--text-muted)" font-size="11" transform="rotate(-90 18 ${height / 2})">Volume (mm³)</text>
+        `;
+    }
+
+    function renderPredictiveTable(model) {
+        const tbody = document.getElementById('pi-table-body');
+        if (!tbody) return;
+
+        const rows = model.checkpoints.map((point) => {
+            const pct = ((point.volume - model.baseline) / model.baseline) * 100;
+            const pctText = point.month === 0 ? '0%' : `${pct >= 0 ? '+' : ''}${pct.toFixed(1)}%`;
+
+            let flagClass = 'safe';
+            let flagText = 'Baseline';
+            if (point.month > 0) {
+                if (point.volume >= model.threshold) {
+                    flagClass = 'danger';
+                    flagText = 'Threshold Exceeded';
+                } else if (pct >= 30) {
+                    flagClass = 'warn';
+                    flagText = 'Accelerating';
+                } else {
+                    flagClass = 'safe';
+                    flagText = 'Monitor';
+                }
+            }
+
+            const label = point.month === 0 ? 'Baseline (now)' : `${point.month} months`;
+            return `
+                <tr>
+                    <td>${label}</td>
+                    <td><strong>${formatCompactMm3(point.volume)}</strong></td>
+                    <td>${pctText}</td>
+                    <td><span class="pi-flag ${flagClass}">${flagText}</span></td>
+                </tr>
+            `;
+        }).join('');
+
+        tbody.innerHTML = rows;
+    }
+
+    function renderPredictiveIntelligence(cr) {
+        if (!cr || !predictiveIntelToggle || !predictiveIntelPanel) {
+            return;
+        }
+
+        const model = buildPredictiveModel(cr);
+        document.getElementById('pi-doubling').innerHTML = `${model.doublingDays}<span style="font-size:16px;color:var(--text-muted)"> days</span>`;
+        document.getElementById('pi-category').textContent = model.category;
+        document.getElementById('pi-sixmo').innerHTML = `${Math.round(model.sixMonth).toLocaleString()}<span style="font-size:14px;color:var(--text-muted)"> mm³</span>`;
+        document.getElementById('pi-rate').innerHTML = `${model.growthRate.toFixed(2)}<span style="font-size:14px;color:var(--text-muted)"> /mo</span>`;
+
+        renderPredictiveChart(model);
+        renderPredictiveTable(model);
+
+        predictivePanelOpen = false;
+        predictiveIntelPanel.classList.remove('visible');
+        predictiveIntelToggle.classList.remove('active');
+        predictiveIntelToggle.style.display = 'block';
+    }
+
+    function renderPredictiveAnalysis(cr) {
+        if (!cr || !predictiveCard) {
+            if (predictiveCard) predictiveCard.style.display = 'none';
+            return;
+        }
+
+        const dm = cr.derived_metrics || {};
+        const gp = cr.grade_probabilities || { WHO_I_II: 0, WHO_III: 0, WHO_IV: 0 };
+        const meta = cr.metadata || {};
+        const mal = Number(cr.malignancy_likelihood_pct || 0);
+        const triage = cr.triage_band || 'ROUTINE';
+
+        const triageEl = document.getElementById('res-triage');
+        triageEl.textContent = triage;
+        triageEl.className = `triage-pill triage-${triage}`;
+
+        document.getElementById('res-malignancy').innerHTML = `${mal.toFixed(1)}<span style="font-size:13px;color:var(--text-muted)">%</span>`;
+        document.getElementById('res-grade-hint').textContent = cr.grade_hint || '--';
+        document.getElementById('bar-malignancy').style.width = `${Math.max(0, Math.min(100, mal))}%`;
+
+        document.getElementById('bar-who12').style.width = `${gp.WHO_I_II || 0}%`;
+        document.getElementById('bar-who3').style.width = `${gp.WHO_III || 0}%`;
+        document.getElementById('bar-who4').style.width = `${gp.WHO_IV || 0}%`;
+        document.getElementById('pct-who12').textContent = `${gp.WHO_I_II || 0}%`;
+        document.getElementById('pct-who3').textContent = `${gp.WHO_III || 0}%`;
+        document.getElementById('pct-who4').textContent = `${gp.WHO_IV || 0}%`;
+
+        const totalCore = Number(dm.total_core || 0);
+        const enhFrac = Number(dm.enhancing_fraction || 0);
+        document.getElementById('chip-total-core').textContent = `${Math.round(totalCore).toLocaleString()} mm³`;
+        document.getElementById('chip-enh-frac').textContent = `${enhFrac.toFixed(1)}%`;
+
+        document.getElementById('res-outcome').textContent = cr.outcome_range || '--';
+        document.getElementById('res-surgical').textContent = cr.surgical_note || '--';
+        document.getElementById('disclaimer-text').textContent = cr.disclaimer || 'Current-scan inference from segmentation features only. Supports triage and discussion, not standalone diagnosis. Requires radiologist and neurosurgeon validation.';
+
+        const warnList = document.getElementById('warn-list');
+        const warnings = meta.warnings || [];
+        if (warnings.length > 0) {
+            warnList.innerHTML = warnings.map((w) => `<div class="warning-item">${w}</div>`).join('');
+        } else {
+            warnList.innerHTML = '<div class="predictive-subtext">No clinical warnings generated.</div>';
+        }
+
+        predictiveCard.style.display = 'block';
+    }
+
     /**
      * ===================================================
      * CORE FUNCTION: Process a File (Send to Backend)
@@ -782,6 +1561,8 @@
         uploadButton.textContent = 'Processing...';
         errorDiv.style.display = 'none';
         resultsDiv.style.display = 'none';
+        if (predictiveIntelToggle) predictiveIntelToggle.style.display = 'none';
+        if (predictiveIntelPanel) predictiveIntelPanel.classList.remove('visible');
         
         showFunFacts();
 
@@ -810,6 +1591,9 @@
             // 2. Display Volumes — read from clinical_report
             const cr = data.clinical_report;
             const vols = cr ? cr.volumes_mm3 : null;
+
+            renderPredictiveAnalysis(cr);
+            renderPredictiveIntelligence(cr);
 
             if (vols) {
                 if (volTotalSpan) volTotalSpan.textContent = (vols.total_tumor || 0).toFixed(2);
@@ -934,6 +1718,10 @@
     if(viewSample1Btn) {
         viewSample1Btn.addEventListener('click', () => {
             const modelUrl = viewSample1Btn.dataset.url;
+
+            if (predictiveCard) predictiveCard.style.display = 'none';
+            if (predictiveIntelToggle) predictiveIntelToggle.style.display = 'none';
+            if (predictiveIntelPanel) predictiveIntelPanel.classList.remove('visible');
             
             // Parse volumes from data attributes
             const volTotal = parseFloat(viewSample1Btn.dataset.volTotal || 0);

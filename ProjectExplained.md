@@ -105,3 +105,69 @@ This module takes the volumes and acts like an AI neuro-oncologist:
 5. The system calculates exact volumes and runs them through a clinical logic engine to predict urgency and tumor grade.
 6. The voxels are smoothed and converted into an optimized 3D GLB mesh.
 7. The UI receives the data, rendering the 3D model, the interactive clinical hotspots, and the AI Surgical Assessment dashboard.
+
+---
+
+## 5. Methodology
+
+The proposed methodology implements an end-to-end pipeline for automated brain tumor analysis, combining multimodal MRI preprocessing, deep learning-based segmentation, quantitative volumetry, and interactive 3D reconstruction. The workflow is designed to bridge the gap between voxel-level prediction and clinically interpretable visualization.
+
+### 5.1 Dataset Acquisition
+
+The system is developed and evaluated using the BraTS 2020 benchmark dataset, which contains pre-operative, multi-institutional brain MRI studies of glioma patients. Each subject includes four co-registered MRI modalities: FLAIR, T1-weighted (T1), contrast-enhanced T1-weighted (T1ce), and T2-weighted (T2). These modalities provide complementary anatomical and pathological information, including edema, structural anatomy, contrast enhancement, and fluid-sensitive tissue contrast.
+
+The reference segmentation labels are harmonized to a continuous label space for model training and inference. In the implementation, the original BraTS label 4 is remapped to label 3 so that the output classes become background (0), necrotic/non-enhancing core (1), edema (2), and enhancing tumor (3).
+
+### 5.2 Data Preprocessing
+
+To reduce inter-patient variability and scanner-related heterogeneity, all inputs are standardized using MONAI-based preprocessing. The pipeline applies the following operations:
+
+- Spatial orientation standardization using the RAS anatomical convention.
+- Isotropic resampling with 1 mm x 1 mm x 1 mm voxel spacing.
+- Intensity normalization to a fixed range to improve numerical stability during training and inference.
+- Padding and cropping to a fixed spatial size of 240 x 240 x 155 voxels.
+- Channel concatenation to form a 4-channel volumetric input tensor.
+
+During inference, the backend accepts either raw NIfTI volumes or zipped DICOM series. When DICOM data are provided, SimpleITK is used to reconstruct 3D volumes from the slice stacks and preserve spatial metadata required for correct resampling and physical volume estimation.
+
+### 5.3 Model Architecture
+
+The segmentation model is a 3D U-Net implemented in PyTorch with MONAI. The architecture follows an encoder-decoder design:
+
+- The encoder progressively reduces spatial resolution while learning abstract contextual features.
+- The decoder restores spatial resolution through upsampling operations.
+- Skip connections transfer fine-grained localization information from encoder layers to the decoder, improving boundary accuracy.
+
+The network takes a 4-channel 3D input corresponding to the four MRI modalities and produces a voxel-wise multi-class probability map over the four output classes.
+
+### 5.4 Training Protocol
+
+Model training is performed in a GPU-accelerated environment using a patch-based strategy to manage the memory demands of 3D volumes. Training patches are sampled from the standardized MRI volumes, and balanced sampling is used so that tumor-containing patches are sufficiently represented despite the class imbalance typical of medical segmentation problems.
+
+The optimization setup includes:
+
+- Dice + Cross-Entropy loss to jointly optimize overlap quality and voxel-wise classification accuracy.
+- Adam optimization with a learning rate of 1 x 10^-4.
+- ReduceLROnPlateau scheduling to lower the learning rate when validation performance saturates.
+- Early stopping to prevent overfitting and retain the best model according to validation Dice score.
+
+### 5.5 Inference and 3D Reconstruction
+
+For deployment, the trained model is exposed through a FastAPI service. The endpoint accepts a zipped study, extracts the modality volumes, applies the same preprocessing pipeline used during training, and runs 3D inference using a sliding-window strategy with overlap to accommodate full-size brain volumes that exceed the memory limits of a single forward pass.
+
+After inference, the predicted segmentation mask undergoes post-processing to improve anatomical consistency. Low-confidence voxels are removed, connected components are filtered to retain the most plausible lesion regions, and edema is used as an anatomical anchor to suppress spatially implausible tumor fragments.
+
+The final segmentation mask is then used for:
+
+- Volumetric quantification of edema, necrotic core, enhancing tumor, and total lesion volume.
+- Mesh generation using the Marching Cubes algorithm.
+- Mesh simplification with Trimesh so that the 3D output can be rendered efficiently in a web browser.
+- Export of the final visualization as a GLB scene for interactive viewing in the frontend.
+
+### 5.6 Clinical Interpretation Layer
+
+In addition to segmentation, the pipeline computes derived clinical indicators from the predicted volumes. These include total tumor volume, total core volume, enhancing fraction, malignancy likelihood, grade-related heuristics, and triage categories. This rule-based post-processing layer is intended to support clinical interpretation by converting segmented output into actionable summary metrics, while still requiring expert review before any medical decision is made.
+
+### 5.7 Summary of Methodological Contribution
+
+The main methodological contribution of this work is the integration of multimodal 3D segmentation, volumetric analysis, spatially coherent post-processing, and interactive 3D visualization into a single deployable pipeline. By combining deep learning with geometrical reconstruction and clinical summarization, the system produces outputs that are both computationally meaningful and easier to interpret in a medical workflow.
